@@ -40,10 +40,9 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
 #endif
 
     cvs->MotorPince->speed = ComputeSpeed(cvs->MotorPince->clicNumber,F,!extractBits(A,5,5));
-    cvs->MotorRatL->speed = ComputeSpeed(cvs->MotorRatL->clicNumber,G,extractBits(A,3,3));
-    cvs->MotorRatR->speed = ComputeSpeed(cvs->MotorRatR->clicNumber,H,extractBits(A,4,4));
-    cvs->MotorTower->speed = ComputeSpeed(cvs->MotorTower->clicNumber,I,1);
-
+    cvs->MotorRatL->speed = ComputeSpeed(cvs->MotorRatL->clicNumber,H,extractBits(A,4,4));
+    cvs->MotorRatR->speed = ComputeSpeed(cvs->MotorRatR->clicNumber,G,extractBits(A,3,3));
+    
 #ifdef MINIBOT
    /* MyCAN_USwitch(&(cvs->Sensors->uSwitchLeft), &(cvs->Sensors->uSwitchRight));
     char theStr[64];
@@ -54,13 +53,14 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     cvs->Sensors->uSwitchRight = (bool) extractBits(A,9,9);
 #endif // MINIBOT
     cvs->Sensors->uSwitchPinceOut = !((bool) extractBits(A,10,10));
-
+//    cvs->Sensors->uSwitchPinceIn = (bool) extractBits(A,11,11);
+    cvs->Sensors->uSwitchRatL = (bool) extractBits(A,12,12);
+    cvs->Sensors->uSwitchRatR = (bool) extractBits(A,11,11); 
     
     /* TOWER */
     int newTurn = extractBits(A,15,15);
     if(newTurn != previousTurn){        
         previousTurn = newTurn;
-        cvs->Tower->newTurn = true;
         cvs->Tower->nb_rising = nb_rising;
         cvs->Tower->nb_falling = nb_falling;
         cvs->Tower->nb_opponents = nb_opponents;
@@ -258,13 +258,6 @@ void InitWebVariables(CtrlStruct *cvs){
     var27 = cvs->Param->radiusBot;
     var28 = 0;
     var29 = cvs->Param->maxAcceleration;
-    var30 = cvs->Obstacles->CircleList[0].x;
-    var31 = cvs->Obstacles->CircleList[0].y;
-    var32 = cvs->Obstacles->CircleList[0].isActive;
-    
-    var33 = cvs->Obstacles->CircleList[1].x;
-    var34 = cvs->Obstacles->CircleList[1].y;
-    var35 = cvs->Obstacles->CircleList[1].isActive;
     
     var1Status = var1;
     var2Status = var2;
@@ -354,13 +347,12 @@ void RefreshWebVariables(CtrlStruct *cvs){
     var27Status = cvs->Param->radiusBot;
     var28Status = var28;
     var29Status = cvs->Param->maxAcceleration;
-    var30Status = cvs->Obstacles->CircleList[0].x;
-    var31Status = cvs->Obstacles->CircleList[0].y;
-    var32Status = cvs->Obstacles->CircleList[0].isActive;
-    var33Status = cvs->Obstacles->CircleList[1].x;
-    var34Status = cvs->Obstacles->CircleList[1].y;
-    var35Status = cvs->Obstacles->CircleList[1].isActive;
-    
+    var30Status = 0;
+    var31Status = 0;
+    var32Status = 0;
+    var33Status = 0;
+    var34Status = 0;
+    var35Status = 0;
     var36Status = 0;
     var37Status = 0;
     var38Status = 0;
