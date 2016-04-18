@@ -63,7 +63,8 @@ void controller_loop(CtrlStruct *cvs){
     cvs->MotorTower->dutyCycle = TourelleDC;
 
    */
-        StrategyTest(cvs);
+    StrategyTest(cvs);
+    
 	AlwaysEndController(cvs);
 }
 

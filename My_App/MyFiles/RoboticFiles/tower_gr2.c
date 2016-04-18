@@ -53,12 +53,12 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 			double angle = angleFromTower;
 			double x = cvs->Odo->x + distance*cos(DEGtoRAD * (cvs->Odo->theta + angle));
 			double y = cvs->Odo->y + distance*sin(DEGtoRAD * (cvs->Odo->theta + angle));
-			//if(IsBot(x, y)) { //!!! TO UNCOMMENT
+			if(IsBot(x, y)) { //!!! TO UNCOMMENT
 				if (numberUpdated < NumberOfCircles_INIT) { //If all bots have not been updated
 					FilterTowerBot(cvs, x, y);
 					numberUpdated++;
 				}
-			//}
+			}
 		}
 		for (i = 0; i < NumberOfCircles_INIT; i++) { //Deactivate the bots that have not been detected
 			if(!cvs->Obstacles->CircleList[i].hasBeenUpdated){
@@ -66,6 +66,11 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
                     cvs->Obstacles->CircleList[i].isActive = false;
                     cvs->AllFiltersTower->FilterTowerList[i].firstInit = true;
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
+                    int j;
+                    for(j = 0; j < TOWER_AVERAGING_NUMBER; j++){
+                        cvs->AllFiltersTower->FilterTowerList[i].xList[j] = - 10;
+                        cvs->AllFiltersTower->FilterTowerList[i].yList[j] = - 10;
+                    }
                 } //Deactivate the beacon
                 else {
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection++;
