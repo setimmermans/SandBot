@@ -435,7 +435,7 @@ void InitObstacles(CtrlStruct *cvs) {
 	cvs->Obstacles->RectangleList[9].height = 0.01;
 }
 
-void InitDyna(CtrlStruct *cvs){
+/*void InitDyna(CtrlStruct *cvs){
 #ifdef REALBOT
     cvs->DynaLeft = (Dyna*)malloc(sizeof(Dyna));
     cvs->DynaLeft->timer = 0;
@@ -446,11 +446,16 @@ void InitDyna(CtrlStruct *cvs){
     cvs->DynaRight->timer = 0;
     cvs->DynaRight->enable = false;
     cvs->DynaRight->stateDyna = grap;
-    
-    SendMessageDyna(0x06,0x0005,0x0008,0x0000);
-    SendMessageDyna(0x06,0x0005,0x0019,0x1);
+
+    SendMessageDyna(0xFE,0x0005,0x0008,0x03ff);
+    MyDelayMs(100);
+    SendMessageDyna(0xFE,0x0005,0x0006,0x0000);
+    MyDelayMs(100);
+    SendMessageDyna(0xFE,0x0005,0x0019,0x1);
+    MyDelayMs(100);
+    //SendMessageDyna(0xFE,0x0005,0x0004,0x34);
 #endif
-}
+}*/
 
 
 #ifndef REALBOT

@@ -21,9 +21,8 @@ void TurnCCW(int id, int value);
 void TurnCW(int id, int value);
 void ReadDyna();
 void StopTurn(int id, int i);
-void AllumeLed(int id);
-void WhichPosition(int id);
-//void InitDyna();
+void AllumeLed(int id, int value);
+void InitDyna();
 
 #endif
 

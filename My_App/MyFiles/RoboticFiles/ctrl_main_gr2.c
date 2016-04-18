@@ -142,7 +142,8 @@ void controller_loop(CtrlStruct *cvs){
       else
       {
             cvs->MotorTower->dutyCycle = 0;
-         MyStrategy(cvs);
+         //MyStrategy(cvs);
+            DynaTestFunction(cvs);
       }
     }
        

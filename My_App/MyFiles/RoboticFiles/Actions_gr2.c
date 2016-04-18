@@ -295,7 +295,7 @@ bool Action3(CtrlStruct *cvs){
             reached = (color == GREEN) ? ReachPointPotential(cvs, 0 , 1, 0.03) : ReachPointPotential(cvs, 0 , -1, 0.03);
         }
         if(reached){
-            cvs->stateStrategy = Action4;
+            //cvs->stateStrategy = Action4;
         }
         return reached;
         break;
