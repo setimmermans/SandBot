@@ -61,9 +61,6 @@ void controller_init(CtrlStruct *cvs){
 void controller_loop(CtrlStruct *cvs){
 	AlwaysInController(cvs);
     
-    cvs->Odo->x = 0;
-    cvs->Odo->y = 0;
-    cvs->Odo->theta = 0;
 #define WEBSITETEST
 #ifndef WEBSITETEST
     

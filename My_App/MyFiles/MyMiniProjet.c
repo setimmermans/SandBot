@@ -15,7 +15,7 @@
  * MAIN
  *****************************************************************************/
 //#define SD_CARD
-//#define WEB
+#define WEB
 
 
 void MyMiniProjet_Task(void)

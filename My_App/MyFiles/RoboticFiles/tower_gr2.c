@@ -30,9 +30,6 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 	}
 #endif
 	if(cvs->Tower->newTurn) {
-        char theStr[254];
-        sprintf(theStr,"x1 = %f \t y1 = %f \t isActive = %d \t \n", cvs->Obstacles->CircleList[0].x, cvs->Obstacles->CircleList[0].y, cvs->Obstacles->CircleList[0].isActive);
-        MyConsole_SendMsg(theStr);
 		int j;
 		for (j = 0; j < cvs->AllFiltersTower->numberOfEnnemy; j++) {
 			cvs->Obstacles->CircleList[j].hasBeenUpdated = false;
