@@ -337,15 +337,6 @@ bool Action4(CtrlStruct *cvs)
             cvs->MotorR->dutyCycle = 15;
          if(cvs->Odo->x <(1-0.22-0.1322+0.05) )
          {
-            cvs->stateAction4 = DoTheCreneau; 
-         }
-         return false;
-         break;
-       }
-       case(DoTheCreneau) :{
-           bool creneauDone = Creneau(cvs);
-         if(creneauDone)
-         {
             cvs->stateAction4 = AlignedWithFishes; 
          }
          return false;

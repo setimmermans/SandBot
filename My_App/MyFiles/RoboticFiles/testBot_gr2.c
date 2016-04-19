@@ -178,7 +178,7 @@ bool ClosePince(CtrlStruct *cvs){
         return true;
     }
     else
-        cvs->MotorPince->dutyCycle = -50;
+        cvs->MotorPince->dutyCycle = -40;
 
     if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
         return true;
@@ -213,26 +213,22 @@ bool YCalibration(CtrlStruct *cvs, double Y, double Theta){
         if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
 			SpeedRefToDC(cvs, cvs->MotorL, -5);
 			SpeedRefToDC(cvs, cvs->MotorR, -5);
-                        return false;
 		}
-        else {
-                cvs->Odo->timein = (cvs->Odo->timeDelay == 0) ? cvs->time : cvs->Odo->timein;
-                cvs->Odo->timeDelay += 1;
-                if (fabs(cvs->Odo->timein - cvs->time) < 0.5) {
-                        SpeedRefToDC(cvs, cvs->MotorL, -1);
-                        SpeedRefToDC(cvs, cvs->MotorR, -1);
-                        return false;
-                }
-                else {
-                        cvs->MotorL->dutyCycle = 0;
-                        cvs->MotorR->dutyCycle = 0;
-                        cvs->Odo->y = Y; //(color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322);
-                        cvs->Odo->theta = Theta;  //(color == GREEN) ? -90 : 90;
-                        cvs->Odo->timein = 0;
-                        cvs->Odo->timeDelay = 0;
-                        return true;
-                }
-        }
+		else {
+			cvs->Odo->timein = (cvs->Odo->timeDelay == 0) ? cvs->time : cvs->Odo->timein;
+			cvs->Odo->timeDelay += 1;
+			if (fabs(cvs->Odo->timein - cvs->time) < 0.5) {
+				SpeedRefToDC(cvs, cvs->MotorL, -1);
+				SpeedRefToDC(cvs, cvs->MotorR, -1);
+			}
+			else {
+				cvs->Odo->y = Y; //(color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322);
+				cvs->Odo->theta = Theta;  //(color == GREEN) ? -90 : 90;
+				cvs->Odo->timein = 0;
+				cvs->Odo->timeDelay = 0;
+                return true;
+			}
+		}
     return false;
 }
 
@@ -250,9 +246,6 @@ bool XCalibration(CtrlStruct *cvs, double X, double Theta){
 				SpeedRefToDC(cvs, cvs->MotorR, -1);
 			}
 			else {
-                                cvs->MotorL->dutyCycle = 0;
-                                cvs->MotorR->dutyCycle = 0;
-				SpeedRefToDC(cvs, cvs->MotorR, 0);
 				cvs->Odo->x = X; //(1-0.1322);
 				cvs->Odo->theta = Theta; //180;
 				cvs->Odo->timein = 0;
@@ -260,28 +253,6 @@ bool XCalibration(CtrlStruct *cvs, double X, double Theta){
                 return true;
 			}
 		}
-    return false;
-}
-bool Creneau(CtrlStruct *cvs){
-    int color = cvs->robotID;
-    if(color == GREEN){
-        cvs->MotorL->dutyCycle = -10;
-        cvs->MotorR->dutyCycle = -5;
-        if(cvs->Odo->theta > -90){
-            cvs->MotorL->dutyCycle = 0;
-            cvs->MotorR->dutyCycle = 0;
-            return true;
-        }
-    }
-    else{
-        cvs->MotorL->dutyCycle = -5;
-        cvs->MotorR->dutyCycle = -10;
-        if(cvs->Odo->theta < 90){
-            cvs->MotorL->dutyCycle = 0;
-            cvs->MotorR->dutyCycle = 0;
-            return true;
-        }
-    }
     return false;
 }
 
