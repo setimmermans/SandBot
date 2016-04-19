@@ -288,6 +288,8 @@ typedef struct CtrlStruct
 	AllFiltersTower *AllFiltersTower;
     MyTimer *TimerAction;
     MyTimer *TimerCalibration;
+    MyTimer *TimerReleaseBlocksAvance;
+    MyTimer *TimerReleaseBlocksRecule;
 } CtrlStruct;
 
 
