@@ -82,9 +82,11 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     if(newValue1 != previousValue1 || newValue2 != previousValue2){
         previousValue1 = newValue1;
         previousValue2 = newValue2;
-        double angleOffset = 12*DEGtoRAD - 20*DEGtoRAD;//5*M_PI/4;
+        double angleOffset = 12*DEGtoRAD - 35*DEGtoRAD;//5*M_PI/4;
         double angleRising = 2*M_PI*K/cvs->MotorTower->clicNumber + angleOffset;
         double angleFalling = 2*M_PI*L/cvs->MotorTower->clicNumber + angleOffset;
+        sprintf(theStr, "angleRising = %f \t angleFalling = %f \t \n", RADtoDEG*angleRising, RADtoDEG*angleFalling);
+        MyConsole_SendMsg(theStr);
         while(angleRising > M_PI) angleRising = angleRising - 2*M_PI; //To work in [-pi; pi)
         while(angleFalling > M_PI) angleFalling = angleFalling - 2*M_PI; //To work in [-pi; pi)
         angleRising = - angleRising; //positive at left

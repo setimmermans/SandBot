@@ -30,6 +30,9 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 	}
 #endif
 	if(cvs->Tower->newTurn) {
+        char theStr[254];
+        sprintf(theStr,"x1 = %f \t y1 = %f \t isActive = %d \t \n", cvs->Obstacles->CircleList[0].x, cvs->Obstacles->CircleList[0].y, cvs->Obstacles->CircleList[0].isActive);
+        MyConsole_SendMsg(theStr);
 		int j;
 		for (j = 0; j < cvs->AllFiltersTower->numberOfEnnemy; j++) {
 			cvs->Obstacles->CircleList[j].hasBeenUpdated = false;
@@ -65,6 +68,8 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 				if(cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection >= NUMBER_WITHOUT_DETECTION_MAX){
                     cvs->Obstacles->CircleList[i].isActive = false;
                     cvs->AllFiltersTower->FilterTowerList[i].firstInit = true;
+                    cvs->AllFiltersTower->FilterTowerList[i].currentCountOutliers = 0;
+                    cvs->AllFiltersTower->FilterTowerList[i].currentIndex = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
                     int j;
                     for(j = 0; j < TOWER_AVERAGING_NUMBER; j++){
