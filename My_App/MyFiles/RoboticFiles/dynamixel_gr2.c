@@ -39,6 +39,19 @@ void SendMessageDyna(int id, int size, int address, double value){
     Data4 =  ~ ( Data1 + Data2 + Data3 + Data5 + Data6 + Data7);
 
 
+    /*char s[64];
+    sprintf(s,"angle = %d\n", Data6 );
+    MyConsole_SendMsg(s);*/
+
+
+
+    // A_IO_dynDrive = CYCLONE_IO_B_Data [15:0]
+    // A_IO_dynDataWrite_1 = CYCLONE_IO_B_Data [31:16]
+    // A_IO_dynDataWrite_2 = CYCLONE_IO_C_Data [15:0]
+    // A_IO_dynDataWrite_3 = CYCLONE_IO_C_Data [31:16]
+    // A_IO_dynDataWrite_4 = CYCLONE_IO_D_Data [15:0]
+    //
+/*
     MyCyclone_Write(CYCLONE_IO_N_Data,0x0000); // Mise à 0 des commandes d'écritures      A_IO_dynDrive
     MyCyclone_Write(CYCLONE_IO_N_Data, 0x0000); // Mise à 0 de TXD_Enable
     MyCyclone_Write(CYCLONE_IO_N_Data,0x0014);
@@ -60,21 +73,21 @@ void SendMessageDyna(int id, int size, int address, double value){
     MyCyclone_Write(CYCLONE_IO_N_Data, (0x01<<8)&0xFF00);
     MyCyclone_Write(CYCLONE_IO_N_Data, ((0x01<<8)&0xFF00) + (0x14 & 0x00FF));
     MyCyclone_Write(CYCLONE_IO_N_Data,0x0000); // Mise à 0 des commandes d'écritures
-    MyCyclone_Write(CYCLONE_IO_N_Data,0x0c);
+    MyCyclone_Write(CYCLONE_IO_N_Data,0x0c);*/
     i = i+1;
 }
 
-void InitDyna(){
-    SendMessageDyna(0xFE,0x0005,0x0008,0x03ff);
+/*void InitDyna(){
+    SendMessageDyna(0x06,0x0005,0x0008,0x03ff);
     MyDelayMs(100);
-    SendMessageDyna(0xFE,0x0005,0x0006,0x0000);
+    SendMessageDyna(0x06,0x0005,0x0006,0x0000);
     MyDelayMs(100);
-    SendMessageDyna(0xFE,0x0005,0x0019,0x1);
+    SendMessageDyna(0x06,0x0005,0x0019,0x1);
     MyDelayMs(100);
     //SendMessageDyna(0xFE,0x0005,0x0004,0x34);
-}
-void AllumeLed(int id, int value){
-    SendMessageDyna(id, 0x0005, 0x0019, value);
+}*/
+void AllumeLed(int id){
+    SendMessageDyna(id,0x0005,0x0019,0x1);
 }
 void TurnCCW(int id, int value){
     //SendMessageDyna(0x06,0x0005,0x0008,0x0000);
@@ -94,14 +107,12 @@ void  ReadDyna(){
     //MyCyclone_Write(CYCLONE_IO_B_Data,0x14);
     //MyCyclone_Write(CYCLONE_IO_B_Data,0x0c);
 
-    int ID = MyCyclone_Read(CYCLONE_IO_Q_Data);//&0x000F;
-    int Error = MyCyclone_Read(CYCLONE_IO_Q_Data)&0x00F0;
-    int P1 = MyCyclone_Read(CYCLONE_IO_R_Data);//&0x000F;
-    int P2 = MyCyclone_Read(CYCLONE_IO_R_Data)&0x00F0;
+/*    int ID1 = MyCyclone_Read(CYCLONE_IO_Q_Data)&0x00FF;
+    int ID3 = MyCyclone_Read(CYCLONE_IO_R_Data);
     //int ID2 = MyCyclone_Read(CYCLONE_IO_F_Data)&0xFF00;
     char s[64];
-    sprintf(s, "ID = %d, Error = %d, P1 = %d, P2 = %d\n", ID, Error, P1, P2);
-    MyConsole_SendMsg(s);
+    sprintf(s, "ERROR = %d, Para1 = %d, Para2 = %d\n", ID1, ID3, ID3);
+    MyConsole_SendMsg(s);*/
 }
 void StopTurn(int id, int i){
     if(i == 1){
@@ -115,7 +126,15 @@ void SetAngle(int id, int angle){
     if(angle < 0) angle = 0;
     if(angle > 1023) angle = 1023;
     SendMessageDyna(id, 0x0005, 0x001E, angle);
-    MyConsole_SendMsg("SetAngle Done \n");
+}
+void WhichPosition(int id){
+    SendMessageDyna(id, 0x0005, 0x25, 0x02);
+    /*int ID1 = MyCyclone_Read(CYCLONE_IO_Q_Data)&0x00FF;
+    int ID3 = MyCyclone_Read(CYCLONE_IO_R_Data);
+    //int ID2 = MyCyclone_Read(CYCLONE_IO_F_Data)&0xFF00;
+    char s[64];
+    sprintf(s, "ERROR = %d, Para1 = %d, Para2 = %d\n", ID1, ID3, ID3);
+    MyConsole_SendMsg(s);*/
 }
 
 

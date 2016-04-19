@@ -13,18 +13,37 @@ void MyStrategy(CtrlStruct *cvs)
    int color = cvs->robotID;
    switch(cvs->stateStrategy){
         case(GoCalibration) :{ 
-                //bool succeed =  Calibration(cvs);
-            ClosePince(cvs);
-                //if(succeed){
-                    //cvs->stateStrategy = GoAction1;
-                //}
+                bool succeed = Calibration(cvs);
+                    if(!cvs->TimerAction->isSet)
+                    {
+                    SetTimer(cvs, cvs->TimerAction, 15);
+                    }
+                    if(IsTimerTimout(cvs,cvs->TimerAction))
+                    {
+                    ResetTimer(cvs->TimerAction);
+                    cvs->stateStrategy = GoAction1;
+                    }
+                    if(succeed){
+                    ResetTimer(cvs->TimerAction);
+                    cvs->stateStrategy = GoAction1;
+                    }
                 break;
         }
        case(GoAction1) :{ 
                 bool succeed = Action1(cvs);
-                if(succeed){
+                    if(!cvs->TimerAction->isSet)
+                    {
+                    SetTimer(cvs, cvs->TimerAction, 20);
+                    }
+                    if(IsTimerTimout(cvs,cvs->TimerAction))
+                    {
+                    ResetTimer(cvs->TimerAction);
                     cvs->stateStrategy = GoAction2;
-                }
+                    }
+                    if(succeed){
+                    ResetTimer(cvs->TimerAction);
+                    cvs->stateStrategy = GoAction2;
+                     }
                 break;
         }
         case(GoAction2) :{
@@ -86,11 +105,11 @@ enum StateCalib {Cal_y_arr, GoToPoint, AlignAngle, Cal_x_arr, GoToBlocOne, Align
     
 switch (cvs->stateCalib) {
 	case(Cal_y_arr) : {
-        bool isCalibrate = YCalibration(cvs, (color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322), (color == GREEN) ? -90 : 90);
+       bool isCalibrate = YCalibration(cvs, (color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322), (color == GREEN) ? -90 : 90);
        if(isCalibrate){
            cvs->stateCalib = GoToPoint;
-       } 
-        return false;
+       }
+       return false;
        break;
     }
 	case(GoToPoint) :{
@@ -106,9 +125,10 @@ switch (cvs->stateCalib) {
 	case(AlignAngle) :{
             PinceCalibration(cvs);
             bool isAligned = IsAlignedWithTheta(cvs,180,3);
-            if(isAligned)
+            if(isAligned){
                 cvs->stateCalib = Cal_x_arr;
-           return false;
+            }
+            return false;
             break;
         }
 
@@ -118,7 +138,6 @@ switch (cvs->stateCalib) {
             if(isCalibrate){
                 cvs->stateCalib = ReturnToBase;
             }
-
             return false;
             break;
     }
@@ -127,38 +146,27 @@ switch (cvs->stateCalib) {
         bool isopen = PinceCalibration(cvs);
         bool reached = (color == GREEN) ? ReachPointPotential(cvs, -0.14, 1.2, 0.03) : ReachPointPotential(cvs, -0.14, -1.2, 0.03);
         if(reached && isopen){
-            cvs->stateCalib = AlignForBaseAndReturnInIt;
+            cvs->stateCalib = AlignForBase;
         }
         return false;
         break;
     }
-    case(AlignForBaseAndReturnInIt):{
+    case(AlignForBase):{
         
          bool isAligned = (color == GREEN) ? IsAlignedWithTheta(cvs,-90,1) : IsAlignedWithTheta(cvs,90,1);
          if(isAligned){
-             if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
-			SpeedRefToDC(cvs, cvs->MotorL, -5);
-			SpeedRefToDC(cvs, cvs->MotorR, -5);
-		}
-		else {
-			cvs->Odo->timein = (cvs->Odo->timeDelay == 0) ? cvs->time : cvs->Odo->timein;
-			cvs->Odo->timeDelay += 1;
-			if (fabs(cvs->Odo->timein - cvs->time) < 0.5) {
-				SpeedRefToDC(cvs, cvs->MotorL, -1);
-				SpeedRefToDC(cvs, cvs->MotorR, -1);
-                }
-                else {
-                        cvs->Odo->y = (color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322);
-                        cvs->Odo->theta = (color == GREEN) ? -90 :  90;
-                        cvs->Odo->timein = 0;
-                        cvs->Odo->timeDelay = 0;
-                        cvs->stateCalib = Wait;
-                                
-                }
-            }
+            cvs->stateCalib = ReturnInIt;
          }
          return false;
          break;
+    }
+    case(ReturnInIt):{
+        bool isCalibrate = YCalibration(cvs, (color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322), (color == GREEN) ? -90 : 90);
+        if(isCalibrate){
+            cvs->stateCalib = Wait;
+        }
+     return false;
+     break;
     }
     case(Wait):{
         //cvs->stateStrategy = GoAction1;
@@ -169,15 +177,19 @@ switch (cvs->stateCalib) {
 }
 
 void DynaTestFunction(CtrlStruct *cvs){
-    if(cvs->time < 10){
-        SetAngle(0xFE, 163);
-    }
-    else if(cvs->time < 20)
-        SetAngle(0xFE, 140);
-
-    /*SendMessageDyna(0x06, 0x0005, 0x001E, 250);
-    MyDelayMs(100);
-    ReadDyna();*/
+    //AllumeLed();
+    if(cvs->time < 3)
+        SetAngle(0x06, 10);
+    else if(cvs->time < 5)
+        SetAngle(0x03, 90);
+    else if(cvs->time < 7)
+        SetAngle(0x03, 200);
+    else if(cvs->time < 9)
+        SetAngle(0x06, 200);
+    ReadDyna();
+    //ReadDyna();
+    //WhichPosition(0x03);
+    //WhichPosition(0x06);
 }
 	
 //////////////////////////////////////////////////////////// homologation ///////////////////////////////////////////////////////////
@@ -192,7 +204,7 @@ void PointHomologation(CtrlStruct *cvs){
             break;
         }
         case reachViaPoint:{
-            bool isReached;
+            bool isReached=false;
             if(color == GREEN){
                 isReached = ReachPointPotential(cvs, -0.1, 1.2, 0.03);
             }
@@ -208,7 +220,7 @@ void PointHomologation(CtrlStruct *cvs){
             break;
         }
         case AlignWithTheta:{
-            bool isAligned;
+            bool isAligned=false;
             if(color == GREEN){
                 isAligned = IsAlignedWithTheta(cvs,-90,1);
             }
@@ -234,7 +246,7 @@ void PointHomologation(CtrlStruct *cvs){
             break;
         }
         case GoViaZone:{
-            bool isReached;
+            bool isReached=false;
             if(color == GREEN){
                 isReached = ReachPointPotential(cvs, 0.1, 0.575, 0.05);
             }
@@ -246,7 +258,7 @@ void PointHomologation(CtrlStruct *cvs){
             break;
         }
         case AlignZone:{
-            bool isAligned;
+            bool isAligned=false;
             if(color == GREEN){
                 isAligned = IsAlignedWithTheta(cvs,-95,1);
             }
@@ -266,167 +278,137 @@ void PointHomologation(CtrlStruct *cvs){
                 cvs->stateHomologation = OpeningPince;
             break;
         case OpeningPince:{
-            bool calibred = PinceCalibration(cvs);               
+            bool calibred = PinceCalibration(cvs); 
+            if(calibred)
+            {
+                cvs->stateHomologation = HomologationAction1;
+            }
             break;
         }
+         case(HomologationAction1):{
+            bool HousesOk = Action1(cvs);              
+            break;
+        }
+        
     }
 }
 
-////////////////////////////////////////////////////////// minibot - simu /////////////////////////////////////////////////////////////////
-void TheGoals(CtrlStruct *cvs)
-{
-#ifndef REALBOT
-	int color = cvs->robotID;
-	bool my_bool =false;
-	bool releaseConstr = false;
-	double x = cvs->Odo->x;
-	double y = cvs->Odo->y;
-	bool inConstArea = (x < 0.35) && (x > -0.25) && ((y * y) < (0.85*0.85 - (x - 0.25)*(x - 0.25)));//0.6*0.6
-	bool recal = false;
-	bool constr = (cvs->inputs->nb_targets == 2);
 
-	/* ----- Carry 2 targets ----- */
-	if (constr) {
-		ActivateBase(cvs);
-		UpdateTarget(cvs);
-		recal = true;
+void SetTimer(CtrlStruct *cvs, MyTimer *Timer, double time){
+    Timer->beginTime = cvs->time;
+    Timer->endTime = cvs->time + time;
+    Timer->isSet = true;
+}
 
-		/// Via point to avoid local min
-		if (!cvs->Goals->via && !cvs->Goals->inConstr) {
-			cvs->Goals->via = ReachPointPotential(cvs, 0, (color == BLUE || color == RED) ? -0.7 : 0.7, cvs->Goals->precision);
-		}
-		/// Go in constr area 
-		else if (cvs->Goals->via && !cvs->Goals->inConstr) {
-			cvs->Goals->inConstr = ReachPointPotential(cvs, 0, (color == BLUE || color == RED) ? -0.25 : 0.25, cvs->Goals->precision);
-		}
-		/// Release target in constr area
-		else if (cvs->Goals->inConstr) {
-			cvs->outputs->flag_release = 1;
-			cvs->Goals->nbr_target_prev = 0;
-			cvs->Goals->CurrentGoal = (cvs->Goals->previousGoal == 6) ? 0 : cvs->Goals->previousGoal + 1;
-			cvs->stateReCalib = ReCal_rot1;
-			cvs->Goals->via = false;
-			cvs->Goals->inConstr = false;
-		}
+void ResetTimer(MyTimer *Timer){
+    Timer->beginTime = 0;
+    Timer->endTime = 0;
+    Timer->isSet = false;
+}
 
-		DisactivateBase(cvs);
-	}
-
-	/* ----- Recalibration ----- */
-	else if (inConstArea && (cvs->stateReCalib != ReCal_nextStrat)) {
-		recal = true;
-		ReCalibration(cvs);
-		cvs->Goals->timeIN = cvs->time;
-	}
-
-	/* ----- End of match: go in construction area ----- */
-	else if (cvs->Goals->backHome) {
-		recal = false;
-		ActivateBase(cvs);
-
-		/// Via point to avoid local min
-		if (!cvs->Goals->via && !cvs->Goals->endConstr) {
-			cvs->Goals->via = ReachPointPotential(cvs, 0, (color == BLUE || color == RED) ? -0.85 : 0.85, cvs->Goals->precision);
-		}
-
-		/// Go in constr area 
-		else if (cvs->Goals->via && !cvs->Goals->endConstr) {
-			cvs->Goals->endConstr = ReachPointPotential(cvs, 0, (color == BLUE || color == RED) ? -0.25 : 0.25, cvs->Goals->precision);
-		}
-
-		/// Release target in constr area
-		else if (cvs->Goals->endConstr) {
-			cvs->outputs->flag_release = 1;
-			cvs->Goals->nbr_target_prev = 0;
-			cvs->Goals->CurrentGoal = (cvs->Goals->previousGoal == 6) ? 0 : cvs->Goals->previousGoal + 1;
-			cvs->stateReCalib = ReCal_rot1;
-			cvs->Goals->via = false;
-			cvs->Goals->endConstr = false;
-		}
-		DisactivateBase(cvs);
-	}
-
-	/* ----- Reach next goal ----- */
-	else {
-		recal = false;
-		cvs->outputs->flag_release = 0;
-		my_bool = ReachPointPotential(cvs, cvs->Goals->ListOfGoals[cvs->Goals->CurrentGoal].X, cvs->Goals->ListOfGoals[cvs->Goals->CurrentGoal].Y, cvs->Goals->precision);
-		if (my_bool) {
-			cvs->Goals->previousGoal = cvs->Goals->CurrentGoal;
-		}
-	}
-
-	/* ---- Are all the tragets taken? ---- */
-	int nbrTaken = 0;
-	int i;
-	for (i = 0; i < 7; i++) {
-		nbrTaken = (cvs->Goals->ListOfGoals[i].taken == true) ? (nbrTaken + 1) : nbrTaken;
-	}
-	if (nbrTaken == 7) {
-		cvs->Goals->backHome = true;
-	}
-	
-	/* ---- Determine if bot is stuck ---- */
-	if (fabs(cvs->time - cvs->Goals->timeIN) > cvs->Goals->maxtimewait) {
-		cvs->Goals->isblocked = true;
-		cvs->Goals->lockState = cvs->Goals->CurrentGoal;
-	}
-	if (!my_bool) {
-		cvs->Goals->goalIN = 0;
-	}
-
-	/* ----- Find next goal if not recalibrating ----- */
-	if (!recal) {
-		cvs->Goals->isblocked = (cvs->Goals->CurrentGoal != cvs->Goals->lockState) ? 0 : 1;
-		UpdateTarget(cvs);
-		if (my_bool || cvs->Goals->isblocked) {
-			goto_nextstate(cvs, my_bool);
-		}
-	}
-#endif // !REALBOT
+bool IsTimerTimout(CtrlStruct *cvs, MyTimer *Timer){
+    return (cvs->time > Timer->endTime);
 }
 
 
-void goto_nextstate(CtrlStruct *cvs, bool my_bool)
-{		
-	if (cvs->Goals->goalIN == 0) {
-		cvs->Goals->timeIN = cvs->time;
-	}
-	cvs->Goals->goalIN += 1;
-
-	if (fabs(cvs->Goals->timeIN - cvs->time) > 2 || cvs->Goals->isblocked) {
-		bool nextFound = false;
-		bool boucle = false;
-		while (!nextFound) {
-			if ((cvs->Goals->CurrentGoal < 6) && !boucle) {
-				cvs->Goals->CurrentGoal = cvs->Goals->CurrentGoal + 1;
-				if (cvs->Goals->CurrentGoal == cvs->Goals->previousGoal) {
-					boucle = true;
-				}
-			}
-			else if (!boucle)
-			{
-				cvs->Goals->CurrentGoal = 0;
-			}
-
-			if (!(cvs->Goals->ListOfGoals[cvs->Goals->CurrentGoal].taken) && !boucle) {
-				nextFound = true;
-			}
-			else if (boucle) {
-				cvs->Goals->backHome = true;
-				break;
-			}
-		}
-	}
+//ok
+bool PinceCalibration(CtrlStruct *cvs){
+    if(!cvs->Sensors->uSwitchPinceOut){
+        SpeedRefToDC(cvs, cvs->MotorPince, 50);
+        return false;
+    }
+    else{
+        cvs->MotorPince->position = 0;
+        return true;
+    }
 }
 
-void UpdateTarget(CtrlStruct *cvs) {
-#ifndef REALBOT
-	if (cvs->Goals->nbr_target_prev != cvs->inputs->nb_targets) {
-		cvs->Goals->ListOfGoals[cvs->Goals->CurrentGoal].taken = true;
-		cvs->Goals->nbr_target_prev = cvs->inputs->nb_targets;
-	}
-#endif
+bool ClosePince(CtrlStruct *cvs){
+    if(cvs->MotorPince->position < -400){
+        cvs->MotorPince->dutyCycle = 0;
+        return true;
+    }
+    else
+        cvs->MotorPince->dutyCycle = -50;
+
+    if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
+        return true;
+    }
+    return false;
+}
+
+bool DeposeBlock(CtrlStruct *cvs){
+    
+}
+bool YCalibration(CtrlStruct *cvs, double Y, double Theta){
+    int color = cvs->robotID;
+    if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
+            SpeedRefToDC(cvs, cvs->MotorL, -5);
+            SpeedRefToDC(cvs, cvs->MotorR, -5);
+        if(!cvs->TimerCalibration->isSet)
+        {
+            SetTimer(cvs, cvs->TimerCalibration, 5);
+        }
+        if(IsTimerTimout(cvs,cvs->TimerCalibration))
+        {
+            ResetTimer(cvs->TimerCalibration);
+            return true;
+        }
+        return false;
+    }   
+    else  
+    {
+        ResetTimer(cvs->TimerCalibration);
+        cvs->Odo->y = Y;
+        cvs->Odo->theta = Theta;
+        return true;
+    }
+}
+
+bool XCalibration(CtrlStruct *cvs, double X, double Theta){
+    int color = cvs->robotID;
+    if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
+            SpeedRefToDC(cvs, cvs->MotorL, -5);
+            SpeedRefToDC(cvs, cvs->MotorR, -5);
+        if(!cvs->TimerCalibration->isSet)
+        {
+            SetTimer(cvs, cvs->TimerCalibration,5);
+        }
+        if(IsTimerTimout(cvs,cvs->TimerCalibration))
+        {
+            ResetTimer(cvs->TimerCalibration);
+            return true;
+        }
+        return false;
+    }
+    else{
+        ResetTimer(cvs->TimerCalibration);
+        cvs->Odo->x = X;
+        cvs->Odo->theta = Theta;
+        return true;
+    }
+}
+bool Creneau(CtrlStruct *cvs){
+    int color = cvs->robotID;
+    if(color == GREEN){
+        cvs->MotorL->dutyCycle = -10;
+        cvs->MotorR->dutyCycle = -5;
+        if(cvs->Odo->theta > -90){
+            cvs->MotorL->dutyCycle = 0;
+            cvs->MotorR->dutyCycle = 0;
+            return true;
+        }
+    }
+    else{
+        cvs->MotorL->dutyCycle = -5;
+        cvs->MotorR->dutyCycle = -10;
+        if(cvs->Odo->theta < 90){
+            cvs->MotorL->dutyCycle = 0;
+            cvs->MotorR->dutyCycle = 0;
+            return true;
+        }
+    }
+    return false;
 }
 
 

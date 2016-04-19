@@ -157,12 +157,6 @@ void InitSPIChannel(){
     MyCyclone_Write(CYCLONE_IO_K_Enable_Out, 0x00);
     MyCyclone_Write(CYCLONE_IO_L_Enable_Out, 0x00);
     MyCyclone_Write(CYCLONE_IO_M_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_N_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_O_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_P_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_Q_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_R_Enable_Out, 0x00);
-    MyCyclone_Write(CYCLONE_IO_S_Enable_Out, 0x00);
     RightMotorDC = 0;
     LeftMotorDC = 0;
     PinceDC = 0;
