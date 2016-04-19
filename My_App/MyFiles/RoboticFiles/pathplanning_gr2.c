@@ -102,9 +102,9 @@ void RepulsiveForce(CtrlStruct *cvs) {
 	cvs->Poto->FYRob += -sin(DEGtoRAD*cvs->Odo->theta)*FXInertial + cos(DEGtoRAD*cvs->Odo->theta)*FYInertial;
 }
 
-void FromClosestPointToRepForces(CtrlStruct *cvs, double x0, double y0, double xp, double yp, double *FXInertial, double *FYInertial) {
-	double distance = sqrt(pow(x0 - xp, 2) + pow(y0 - yp, 2)) - cvs->Param->radiusBot;
-	if (distance < EPSILON)
+void FromClosestPointToRepForces(CtrlStruct *cvs, double x0, double y0, double xp, double yp, double *FXInertial, double *FYInertial, bool isInside) {
+    double distance = sqrt(pow(x0 - xp, 2) + pow(y0 - yp, 2)) - cvs->Param->radiusBot;
+	if ((distance < EPSILON) || (isInside))
 		distance = EPSILON;
 	if (distance < cvs->Poto->minDistance) {
 		double distanceSquared = distance*distance;
@@ -127,17 +127,18 @@ void ComputeFrepCircle(CtrlStruct *cvs, Circle *circle, double *FXInertial, doub
 	double radius = circle->radius;
 	double xp = 0;
 	double yp = 0;
-
+    bool isInside = false;
 	if (pow(x0 - xc, 2) + pow(y0 - yc, 2) < radius*radius) {
-		xp = x0;
-		yp = y0;
+		xp = xc;
+		yp = yc;
+        isInside = true;
 	}
 	else {
 		double angle = atan2((y0 - yc), (x0 - xc));
 		xp = xc + radius*cos(angle);
 		yp = yc + radius*sin(angle);
 	}
-	FromClosestPointToRepForces(cvs, x0, y0, xp, yp, FXInertial, FYInertial);
+	FromClosestPointToRepForces(cvs, x0, y0, xp, yp, FXInertial, FYInertial, isInside);
 }
 
 void ComputeFrepRectangle(CtrlStruct *cvs, Rectangle *Rectangle, double *FXInertial, double *FYInertial) {
@@ -151,6 +152,7 @@ void ComputeFrepRectangle(CtrlStruct *cvs, Rectangle *Rectangle, double *FXInert
 	int zone = DetermineRectangleZone(Rectangle, x0,y0);
 	double xp;
 	double yp;
+    bool isInside = false;
 	switch (zone) {
 	case (1) :
 		xp = leftEdgeX;
@@ -185,11 +187,12 @@ void ComputeFrepRectangle(CtrlStruct *cvs, Rectangle *Rectangle, double *FXInert
 		yp = bottomEdgeY;
 		break;
 	case(9) :
-		xp = x0;
-		yp = y0;
+		xp = Rectangle->x;
+		yp = Rectangle->y;
+        isInside = true;
 		break;
 	}
-	FromClosestPointToRepForces(cvs, x0, y0, xp, yp, FXInertial, FYInertial);
+	FromClosestPointToRepForces(cvs, x0, y0, xp, yp, FXInertial, FYInertial, isInside);
 }
 
 int DetermineRectangleZone(Rectangle *Rectangle, double x0, double y0) {
@@ -239,6 +242,7 @@ void ComputeFrepQuarterOfCircle(CtrlStruct *cvs, QuarterOfCircle *QuarterOfCircl
 	int zone = DetermineQuarterOfCircleZone(QuarterOfCircle, newX0, newY0);
 	double xp;
 	double yp;
+    bool isInside = false;
 	switch (zone) {
 		case (1) :
 			xp = xc;
@@ -267,8 +271,9 @@ void ComputeFrepQuarterOfCircle(CtrlStruct *cvs, QuarterOfCircle *QuarterOfCircl
 			yp = yc;
 			break;
 		case (7) :
-			xp = newX0;
-			yp = newY0;
+			xp = xc;
+			yp = yc;
+            isInside = true;
 			break;
 	}
 
@@ -276,7 +281,7 @@ void ComputeFrepQuarterOfCircle(CtrlStruct *cvs, QuarterOfCircle *QuarterOfCircl
 	double xpInverse = (cos(angleRotInverse)*(xp - xc) - sin(angleRotInverse)*(yp - yc)) + xc; //InertialCoordinates
 	double ypInverse = (sin(angleRotInverse)*(xp - xc) + cos(angleRotInverse)*(yp - yc)) + yc; //InertialCoordinates
 
-	FromClosestPointToRepForces(cvs, x0, y0, xpInverse, ypInverse, FXInertial, FYInertial);
+	FromClosestPointToRepForces(cvs, x0, y0, xpInverse, ypInverse, FXInertial, FYInertial, isInside);
 }
 
 int DetermineQuarterOfCircleZone(QuarterOfCircle *QuarterOfCircle, double newX0, double newY0) {

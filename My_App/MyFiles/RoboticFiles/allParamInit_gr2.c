@@ -203,6 +203,7 @@ void InitTower(CtrlStruct * cvs)
 	cvs->Tower->tower_prevPos		= cvs->Tower->tower_pos;
 }
 
+
 void InitPotential(CtrlStruct *cvs) {
 	cvs->Poto = (Potential*)malloc(sizeof(Potential));
 	cvs->Poto->katt					= katt_INIT;
@@ -275,63 +276,8 @@ void InitOdometry(CtrlStruct *cvs) {
 		cvs->Odo->y		= 0;
 		cvs->Odo->theta = 0;
 	}
-
 #endif // REALBOT
 }
-
-void InitGoals(CtrlStruct *cvs) {
-	cvs->Goals = (Goals*)malloc(sizeof(Goals));
-	cvs->Goals->NumberOfGoals = MaxGoals;
-	cvs->Goals->ListOfGoals = (Points*)malloc(sizeof(Points)*MaxGoals);
-	int color = cvs->robotID;
-	cvs->stateVia = normalPoint;
-
-	//3 pts
-	cvs->Goals->ListOfGoals[0].X = -0.6;
-	cvs->Goals->ListOfGoals[0].Y = (color == BLUE || color == RED) ? 0.05 : -0.05;
-	cvs->Goals->ListOfGoals[0].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[1].X = -0.65;
-	cvs->Goals->ListOfGoals[1].Y = (color == BLUE || color == RED) ? -1.25 : 1.25;
-	cvs->Goals->ListOfGoals[1].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[2].X = 0.4;
-	cvs->Goals->ListOfGoals[2].Y = (color == BLUE || color == RED) ? -1.1 : 1.1;
-	cvs->Goals->ListOfGoals[2].taken = false;
-	//2 pts
-	cvs->Goals->ListOfGoals[3].X = 0.85;
-	cvs->Goals->ListOfGoals[3].Y = (color == BLUE || color == RED) ? -0.8 : 0.8;
-	cvs->Goals->ListOfGoals[3].taken = false;
-	//2 pts
-	cvs->Goals->ListOfGoals[4].X = 0.85;
-	cvs->Goals->ListOfGoals[4].Y = (color == BLUE || color == RED) ? 0.9 : -0.9;
-	cvs->Goals->ListOfGoals[4].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[5].X = 0.38;
-	cvs->Goals->ListOfGoals[5].Y = (color == BLUE || color == RED) ? 1.15 : -1.15;
-	cvs->Goals->ListOfGoals[5].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[6].X = -0.65;
-	cvs->Goals->ListOfGoals[6].Y = (color == BLUE || color == RED) ? 1.25 : -1.25;
-	cvs->Goals->ListOfGoals[6].taken = false;
-
-	cvs->Goals->precision = goalprecision_INIT;
-	cvs->Goals->CurrentGoal = firstgoal_INIT;
-	cvs->Goals->previousGoal = firstgoal_INIT;
-	cvs->Goals->via = false;
-	cvs->Goals->endConstr = false;
-	cvs->Goals->inConstr = false;
-	cvs->Goals->lockState = -1;
-	cvs->Goals->endParcourt = false;
-	cvs->Goals->backHome = false;
-	cvs->Goals->timeIN = 0.0;
-	cvs->Goals->maxtimewait =  maxtimewait_INIT;
-	cvs->Goals->isblocked = false;
-	cvs->Goals->goalIN = 0;
-	cvs->Goals->over = false;
-	cvs->Goals->nbr_target_prev = 0;
-}
-
 
 void InitObstacles(CtrlStruct *cvs) {
 	cvs->Obstacles = (Obstacles*)malloc(sizeof(Obstacles));
@@ -462,6 +408,7 @@ void InitDyna(CtrlStruct *cvs){
     SendMessageDyna(0x06,0x0005,0x0019,0x1);
 #endif
 }
+
 void InitTowerFilters(CtrlStruct *cvs) {
 	cvs->AllFiltersTower = (AllFiltersTower*)malloc(sizeof(AllFiltersTower));
 	cvs->AllFiltersTower->numberOfEnnemy = NumberOfCircles_INIT;

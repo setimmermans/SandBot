@@ -84,11 +84,19 @@ void SendMotorCommand(CtrlStruct *cvs) {
     else{
         DisableBrakes(cvs->MotorPince);
         if((cvs->MotorPince->previousDutyCycle != cvs->MotorPince->dutyCycle)){
+            if(cvs->MotorPince->dutyCycle > 50 )
+            {
+                cvs->MotorPince->dutyCycle = 50;
+            }
+            if(cvs->MotorPince->dutyCycle < -50 )
+            {
+                cvs->MotorPince->dutyCycle = -50;
+            }
             cvs->MotorPince->previousDutyCycle = cvs->MotorPince->dutyCycle;       
             ActivateMotor_RealBot(cvs->MotorPince);
         }
     }
-// RATEAUL
+// RATEAULeft
     if((cvs->MotorRatL->dutyCycle == 0)){
         if((!cvs->MotorRatL->areBrakesEnabled)){
             EnableBrakes(cvs->MotorRatL);
@@ -96,6 +104,14 @@ void SendMotorCommand(CtrlStruct *cvs) {
     }
     else{
         DisableBrakes(cvs->MotorRatL);
+            if(cvs->MotorRatL->dutyCycle > 50 )
+            {
+                cvs->MotorRatL->dutyCycle = 50;
+            }
+            if(cvs->MotorRatL->dutyCycle < -50 )
+            {
+                cvs->MotorRatL->dutyCycle = -50;
+            }
         if((cvs->MotorRatL->previousDutyCycle != cvs->MotorRatL->dutyCycle)){
             cvs->MotorRatL->previousDutyCycle = cvs->MotorRatL->dutyCycle;       
             ActivateMotor_RealBot(cvs->MotorRatL);
@@ -109,6 +125,14 @@ void SendMotorCommand(CtrlStruct *cvs) {
     }
     else{
         DisableBrakes(cvs->MotorRatR);
+            if(cvs->MotorRatR->dutyCycle > 50 )
+            {
+                cvs->MotorRatR->dutyCycle = 50;
+            }
+            if(cvs->MotorRatR->dutyCycle < -50 )
+            {
+                cvs->MotorRatR->dutyCycle = -50;
+            }
         if((cvs->MotorRatR->previousDutyCycle != cvs->MotorRatR->dutyCycle)){
             cvs->MotorRatR->previousDutyCycle = cvs->MotorRatR->dutyCycle;       
             ActivateMotor_RealBot(cvs->MotorRatR);

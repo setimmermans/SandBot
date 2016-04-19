@@ -3,6 +3,7 @@
 
 #include "CtrlStruct_gr2.h"
 #include "strategy_gr2.h"
+#include "controller_gr2.h"
 #ifndef REALBOT
 #include "namespace_ctrl.h"
 #include <stdlib.h>
@@ -34,6 +35,9 @@ void StrategyTest(CtrlStruct *cvs);
 bool PinceCalibration(CtrlStruct *cvs);
 bool ClosePince(CtrlStruct *cvs);
 bool DeposeBlock(CtrlStruct *cvs);
+bool YCalibration(CtrlStruct *cvs, double Y, double Theta);
+bool XCalibration(CtrlStruct *cvs, double X, double Theta);
+bool Creneau(CtrlStruct *cvs);
 #endif //REALBOT
 
 

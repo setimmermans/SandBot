@@ -82,6 +82,10 @@ void MyMiniProjet_Task(void)
                     previousTime = currentTime;
                     controller_loop(cvs);    
                     
+                   
+                    
+                    
+                    
         //#define TESTS
 
         #ifndef TESTS
@@ -158,6 +162,7 @@ void InitSPIChannel(){
     PinceDC = 0;
     RateauRDC = 0;
     RateauLDC = 0;
+    CommandMotorByHand = false;
 }
 
 double fmin(double A, double B){

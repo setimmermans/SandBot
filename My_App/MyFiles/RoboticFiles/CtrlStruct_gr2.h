@@ -48,22 +48,26 @@ NAMESPACE_INIT(ctrlGr2);
 #define LIMITACCELERATION 1
 #define MAXSPEED 2*M_PI
 #define MAXSPEEDROT 30*MAXSPEED
-
 #define KIFLUSHLIMIT 1000
-#define MaxGoals 15
+
 
 #define TOWER_AVERAGING_NUMBER 2
 #define TOWER_OUTLIERS_COMPARE 1
 #define BEACON_POSITION_TOLERANCE 0.1
 #define MAXSPEED_ENNEMYBOT 3
 #define NUMBER_WITHOUT_DETECTION_MAX 3
-//enum StateCalib {Cal_y_arr, Cal_y_arr2, Cal_y_av, Cal_y_av1, Cal_rot_neg, Cal_x_arr, Cal_x_av, Cal_rot_pos, Action1 };
+
 enum StateCalib {Cal_y_arr, GoToPoint, AlignAngle, Cal_x_arr, ReturnToBase, AlignForBaseAndReturnInIt, Wait}; // GoToBlocOne, AlignBlocOne, TakeBlocOne, BringBlocOne, ReleaseBlockOne, AlignForBlockOne};
 enum StateDyna {grap, release};
 enum StateVia {backHomeViaBase, backHomeStraight, normalPoint, viaPoint};
-enum StateHomologation {PinceCalib, reachViaPoint, AlignWithTheta, ReachBlocs, ClosingPince, GoViaZone, AlignZone, GoInZone, OpeningPince};
-enum StateAction1{GoToBlocOne, AlignForBlocOne, TakeBlocOne, BringBlockOne, ReleaseBlockOne, AlignForBlockOne};
-enum StateAction2{GoToBlocTwo, AlignForBlocTwo, AvanceForBlockTwo, ReculeForBlockTwo, BringBlockTwoViaPoint, TakeBlocTwo, BringBlockTwo, ReleaseBlockTwo, AlignForBlockTwo};
+enum StateHomologation {PinceCalib, reachViaPoint, AlignWithTheta, ReachBlocs, ClosingPince, GoViaZone, AlignZone, GoInZone, OpeningPince,HomologationAction1};
+enum StateAction1{GoToHouses, AlignedWithHouses, PushHouses, FreeHouses};
+enum StateAction2{GoToBlocOne, AlignForBlocOne, TakeBlocOne, BringBlockOne, ReleaseBlockOne, AlignForBlockOne,AlignForCalibAction2, Calib_y};
+enum StateAction3{GoToBlocTwoCalib, AlignForCalibAction3, Calib_x, GoToBlocTwo, AlignForBlocTwo, AvanceForBlockTwo, ReculeForBlockTwo, BringBlockTwoViaPoint, TakeBlocTwo, BringBlockTwo, ReleaseBlockTwo, AlignForBlockTwo};
+enum StateAction4{GoToFish, AlignForCalibFishes, CalibFishes, DecaleBordFishes, DoTheCreneau, AlignedWithFishes,RatGoTopStartFish, DyntakeFish, MoveWithFish, ReleaseFish};
+enum StateStrategy{GoCalibration, GoAction1, GoAction2, GoAction3,GoAction4, GoBase};
+
+
 typedef struct Potential {
 	double katt;
 	double krep;
@@ -259,6 +263,9 @@ typedef struct CtrlStruct
     enum StateHomologation stateHomologation;
     enum StateAction1 stateAction1;
     enum StateAction2 stateAction2;
+    enum StateAction3 stateAction3;
+    enum StateAction4 stateAction4;
+    enum StateStrategy stateStrategy;
 	Parametres *Param;
 	Potential *Poto;
 	Odometry *Odo;

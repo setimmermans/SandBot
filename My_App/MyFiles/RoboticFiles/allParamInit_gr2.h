@@ -195,7 +195,7 @@ NAMESPACE_INIT(ctrlGr2);
 #define FXRob_INIT				0
 #define FyRob_INIT				0
 #define kw_INIT					100
-#define minDistance_INIT		0.5 
+#define minDistance_INIT		0.5
 #define thresholdAligned_INIT   0.5//10
 
 /************************************
@@ -252,10 +252,10 @@ void InitSensors(CtrlStruct *cvs);
 void InitTower(CtrlStruct *cvs);
 void InitPotential(CtrlStruct *cvs);
 void InitOdometry(CtrlStruct *cvs);
-void InitGoals(CtrlStruct *cvs);
 void InitObstacles(CtrlStruct *cvs);
 void InitDyna(CtrlStruct *cvs);
 void InitTowerFilters(CtrlStruct *cvs);
+
 #ifndef REALBOT
 NAMESPACE_CLOSE();
 #endif // !REALBOT

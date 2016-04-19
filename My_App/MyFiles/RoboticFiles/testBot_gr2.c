@@ -67,14 +67,14 @@ void Action11Test(CtrlStruct *cvs){
                 cvs->DynaLeft->enable = true;
             }
             else if(cvs->time - cvs->DynaLeft->timer < 4){
-                TurnCCW(20);
+                TurnCCW(0xFE, 20);
                 sprintf(s,"GoTurn\n");
                 MyConsole_SendMsg(s);
             }
             else{
                 sprintf(s,"StopTurn\n");
                 MyConsole_SendMsg(s);
-                StopTurn(1);
+                StopTurn(0xFE, 1);
                 cvs->DynaLeft->stateDyna = release;
                 cvs->DynaLeft->enable = false;
             }
@@ -85,14 +85,14 @@ void Action11Test(CtrlStruct *cvs){
                 cvs->DynaLeft->enable = true;
             }
             else if(cvs->time - cvs->DynaLeft->timer < 4){
-                TurnCW(20);
+                TurnCW(0xFE, 20);
                 sprintf(s,"GoTurn\n");
                 MyConsole_SendMsg(s);
             }
             else{
                 sprintf(s,"StopTurn\n");
                 MyConsole_SendMsg(s);
-                StopTurn(0);
+                StopTurn(0xFE, 0);
                 cvs->DynaLeft->stateDyna = grap;
             }
     }
@@ -163,7 +163,7 @@ void StrategyTest(CtrlStruct *cvs){
 //ok
 bool PinceCalibration(CtrlStruct *cvs){
     if(!cvs->Sensors->uSwitchPinceOut){
-        SpeedRefToDC(cvs, cvs->MotorPince, 45);
+        SpeedRefToDC(cvs, cvs->MotorPince, 50);
         return false;
     }
     else{
@@ -178,7 +178,7 @@ bool ClosePince(CtrlStruct *cvs){
         return true;
     }
     else
-        cvs->MotorPince->dutyCycle = -40;
+        cvs->MotorPince->dutyCycle = -50;
 
     if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
         return true;
@@ -208,7 +208,82 @@ bool DeposeBlock(CtrlStruct *cvs){
         return true;
     }
 }
+bool YCalibration(CtrlStruct *cvs, double Y, double Theta){
+    int color = cvs->robotID;
+        if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
+			SpeedRefToDC(cvs, cvs->MotorL, -5);
+			SpeedRefToDC(cvs, cvs->MotorR, -5);
+                        return false;
+		}
+        else {
+                cvs->Odo->timein = (cvs->Odo->timeDelay == 0) ? cvs->time : cvs->Odo->timein;
+                cvs->Odo->timeDelay += 1;
+                if (fabs(cvs->Odo->timein - cvs->time) < 0.5) {
+                        SpeedRefToDC(cvs, cvs->MotorL, -1);
+                        SpeedRefToDC(cvs, cvs->MotorR, -1);
+                        return false;
+                }
+                else {
+                        cvs->MotorL->dutyCycle = 0;
+                        cvs->MotorR->dutyCycle = 0;
+                        cvs->Odo->y = Y; //(color == GREEN) ? (1.5-0.1322) : -(1.5-0.1322);
+                        cvs->Odo->theta = Theta;  //(color == GREEN) ? -90 : 90;
+                        cvs->Odo->timein = 0;
+                        cvs->Odo->timeDelay = 0;
+                        return true;
+                }
+        }
+    return false;
+}
 
+bool XCalibration(CtrlStruct *cvs, double X, double Theta){
+    int color = cvs->robotID;
+    		if (!cvs->Sensors->uSwitchLeft && !cvs->Sensors->uSwitchRight) {
+			SpeedRefToDC(cvs, cvs->MotorL, -5);
+			SpeedRefToDC(cvs, cvs->MotorR, -5);
+		}
+		else {
+			cvs->Odo->timein = (cvs->Odo->timeDelay == 0) ? cvs->time : cvs->Odo->timein;
+			cvs->Odo->timeDelay += 1;
+			if (fabs(cvs->Odo->timein - cvs->time) < 0.5) {
+				SpeedRefToDC(cvs, cvs->MotorL, -1);
+				SpeedRefToDC(cvs, cvs->MotorR, -1);
+			}
+			else {
+                                cvs->MotorL->dutyCycle = 0;
+                                cvs->MotorR->dutyCycle = 0;
+				SpeedRefToDC(cvs, cvs->MotorR, 0);
+				cvs->Odo->x = X; //(1-0.1322);
+				cvs->Odo->theta = Theta; //180;
+				cvs->Odo->timein = 0;
+				cvs->Odo->timeDelay = 0;
+                return true;
+			}
+		}
+    return false;
+}
+bool Creneau(CtrlStruct *cvs){
+    int color = cvs->robotID;
+    if(color == GREEN){
+        cvs->MotorL->dutyCycle = -10;
+        cvs->MotorR->dutyCycle = -5;
+        if(cvs->Odo->theta > -90){
+            cvs->MotorL->dutyCycle = 0;
+            cvs->MotorR->dutyCycle = 0;
+            return true;
+        }
+    }
+    else{
+        cvs->MotorL->dutyCycle = -5;
+        cvs->MotorR->dutyCycle = -10;
+        if(cvs->Odo->theta < 90){
+            cvs->MotorL->dutyCycle = 0;
+            cvs->MotorR->dutyCycle = 0;
+            return true;
+        }
+    }
+    return false;
+}
 
 #endif // REALBOT
 

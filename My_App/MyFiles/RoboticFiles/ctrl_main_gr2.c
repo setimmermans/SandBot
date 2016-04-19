@@ -18,7 +18,7 @@ void controller_init(CtrlStruct *cvs){
     cvs->previousTimeCAN = 0;
     cvs->timeOffset = 0;
 #ifdef REALBOT
-    cvs->robotID = GREEN; //getRobotID();
+    cvs->robotID = GREEN;//PINK; //getRobotID();
     cvs->timeStep = TIMESTEP_REALBOT;
 #else
     cvs->robotID = cvs->inputs->robot_id;
@@ -31,12 +31,17 @@ void controller_init(CtrlStruct *cvs){
 	InitSensors(cvs);
 	InitObstacles(cvs);
 	InitTower(cvs);
-	InitGoals(cvs);
     InitDyna(cvs);
-	InitTowerFilters(cvs);
+    InitTowerFilters(cvs);
+
 	int color = cvs->robotID;
 	cvs->stateCalib = Cal_y_arr;
     cvs->stateHomologation = PinceCalib;
+    cvs->stateAction1 = GoToHouses;
+    cvs->stateAction2 = GoToBlocOne;
+    cvs->stateAction3 = GoToBlocTwoCalib;
+    cvs->stateAction4 = GoToFish;
+    cvs->stateStrategy =  GoCalibration;//GoAction4;//
 #ifdef REALBOT
     InitRegMotor(cvs->MotorL);
     InitRegMotor(cvs->MotorR);
@@ -54,16 +59,60 @@ void controller_init(CtrlStruct *cvs){
  */
 void controller_loop(CtrlStruct *cvs){
 	AlwaysInController(cvs);
-  /*  
+    
+//#define WEBSITETEST
+#ifndef WEBSITETEST
+    
+   cvs->Param->MotorCommandByHand = CommandMotorByHand;
+   if(cvs->Param->MotorCommandByHand)
+   {
     cvs->MotorL->dutyCycle = LeftMotorDC;//RightMotorDC;
-    cvs->MotorR->dutyCycle = RightMotorDC;// RightMotorDC;int        LeftMotorDC;
-    cvs->MotorPince->dutyCycle = PinceDC;
+    cvs->MotorR->dutyCycle = RightMotorDC;// RightMotorDC;
+    cvs->MotorTower->dutyCycle = TourelleDC;
     cvs->MotorRatL->dutyCycle = RateauLDC; //RightMotorDC;//RightMotorDC;
     cvs->MotorRatR->dutyCycle = RateauRDC; //RightMotorDC;//RightMotorDC;
-    cvs->MotorTower->dutyCycle = TourelleDC;
+    cvs->MotorPince->dutyCycle = PinceDC;//RightMotorDC;*/   
+   }
+   else if(cvs->time > 200){
+       cvs->MotorL->dutyCycle = 0;//RightMotorDC;
+        cvs->MotorR->dutyCycle = 0;// RightMotorDC;
+        cvs->MotorTower->dutyCycle = 0;
+        cvs->MotorRatL->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
+        cvs->MotorRatR->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
+        cvs->MotorPince->dutyCycle = 0;//RightMotorDC;*/
+   }
+   else{
 
-   */
-        StrategyTest(cvs);
+          //   StartMyRat(cvs);
+
+              /*    char s[659];
+       sprintf(s,"time = %f \t cvs->MotorRatL= %f  \t cvs->MotorRatL->speed = %f cvs->MotorRatR->speed R = %f \n", cvs->time, cvs->MotorRatL->position, cvs->MotorRatL->speed,cvs->MotorRatR->speed);
+        MyConsole_SendMsg(s);*/
+     //  Calibration(cvs);
+
+    //   ReachPointPotential(cvs, 0.8, 0.8, 0.03);
+      //  DynaTestFunction(cvs);
+     /* if(cvs->time<5)
+      {
+          RatGoBottom(cvs, cvs->MotorRatL);
+          //MyStrategy(cvs);
+      }
+      else
+      {
+        // cvs->MotorTower->dutyCycle = 0;
+         //MyStrategy(cvs);
+        // PointHomologation(cvs);
+          
+      }*/
+       Calibration(cvs);
+    }
+       
+#else
+      StrategyTest(cvs);
+#endif
+
+    //PinceCalibration(cvs);
+
 	AlwaysEndController(cvs);
 }
 
@@ -88,7 +137,7 @@ void controller_finish(CtrlStruct *cvs)
 	free(cvs->Obstacles);
 	free(cvs->Goals->ListOfGoals);
 	free(cvs->Goals);
-	free(cvs->AllFiltersTower->FilterTowerList);
+    free(cvs->AllFiltersTower->FilterTowerList);
 	free(cvs->AllFiltersTower);
 #ifdef REALBOT
     free(cvs->MotorRatL);
@@ -105,7 +154,6 @@ void UpdateFromFPGA(CtrlStruct *cvs) {
     cvs->time = cvs->inputs->t;
 	cvs->MotorL->speed = cvs->inputs->l_wheel_speed;
 	cvs->MotorR->speed = cvs->inputs->r_wheel_speed;
-	
     cvs->Odo->speedR = cvs->MotorR->speed;
     cvs->Odo->speedL = cvs->MotorL->speed;
 	cvs->Tower->falling_index = cvs->inputs->falling_index;
@@ -138,6 +186,7 @@ void AlwaysInController(CtrlStruct *cvs) {
 
 #ifndef REALBOT
 	UpdateFromFPGA(cvs);
+  //  OpponentDetection(cvs); //NEED TO BE IN TWO
 #else 
     UpdateFromFPGARealBot(cvs);
 #endif // ! REALBOT
