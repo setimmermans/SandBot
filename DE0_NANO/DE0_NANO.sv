@@ -499,9 +499,9 @@ begin
 			ResetCompteurVitesse <= 1'b0;
 end
 
-assign GPIO_0[26] = UARTTX;
-assign UARTRX = GPIO_0[24];
-assign GPIO_0[22] = UARTDIR;
+assign GPIO_0[29] = UARTTX;
+assign UARTRX = GPIO_0[28];
+assign GPIO_0[27] = UARTDIR;
 
 //--- Envoi data ----------------------------------------
 
