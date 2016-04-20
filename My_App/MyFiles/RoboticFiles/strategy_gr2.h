@@ -11,6 +11,8 @@
 #include "controller_gr2.h"
 #include "ctrl_main_gr2.h"
 #include "dynamixel_gr2.h"
+#include "testBot_gr2.h"
+#include "Actions_gr2.h"
 #ifndef REALBOT
 #include "namespace_ctrl.h"
 #include <stdlib.h>
@@ -19,15 +21,21 @@ NAMESPACE_INIT(ctrlGr2);
 #endif // ! REALBOT
 
 void    MyStrategy(CtrlStruct *cvs);
-void	TheGoals(CtrlStruct *cvs);
-void	goto_nextstate(CtrlStruct *cvs, bool my_bool);
-void	UpdateTarget(CtrlStruct *cvs);
 void	ActivateBase(CtrlStruct *cvs);
 void	DisactivateBase(CtrlStruct *cvs);
 bool	Calibration(CtrlStruct *cvs);
 void	ReCalibration(CtrlStruct *cvs);
 void    PointHomologation(CtrlStruct *cvs);
 void    DynaTestFunction(CtrlStruct *cvs);
+void    SetTimer(CtrlStruct *cvs, MyTimer *Timer, double time);
+void    ResetTimer(MyTimer *Timer);
+bool    IsTimerTimout(CtrlStruct *cvs, MyTimer *Timer);
+bool    PinceCalibration(CtrlStruct *cvs);
+bool    ClosePince(CtrlStruct *cvs);
+bool    DeposeBlock(CtrlStruct *cvs);
+bool    YCalibration(CtrlStruct *cvs, double Y, double Theta);
+bool    XCalibration(CtrlStruct *cvs, double X, double Theta);
+bool    Creneau(CtrlStruct *cvs);
 #ifndef REALBOT
 NAMESPACE_CLOSE();
 #endif // ! REALBOT

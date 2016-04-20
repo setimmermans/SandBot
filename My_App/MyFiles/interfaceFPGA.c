@@ -27,6 +27,8 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     unsigned int K = MyCyclone_Read(CYCLONE_IO_K_Data);
     unsigned int L = MyCyclone_Read(CYCLONE_IO_L_Data);
     
+     unsigned int M = MyCyclone_Read(CYCLONE_IO_M_Data);
+    
 #ifdef MINIBOT
     cvs->MotorR->speed = ComputeSpeed(cvs->MotorL->clicNumber,C,extractBits(A,1,1));
     cvs->MotorL->speed = ComputeSpeed(cvs->MotorR->clicNumber,B,extractBits(A,2,2));
@@ -42,7 +44,9 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     cvs->MotorPince->speed = ComputeSpeed(cvs->MotorPince->clicNumber,F,!extractBits(A,5,5));
     cvs->MotorRatL->speed = ComputeSpeed(cvs->MotorRatL->clicNumber,H,extractBits(A,4,4));
     cvs->MotorRatR->speed = ComputeSpeed(cvs->MotorRatR->clicNumber,G,extractBits(A,3,3));
-     /* char mStr[64];
+    cvs->MotorTower->speed = ComputeSpeed(cvs->MotorTower->clicNumber,I,1);
+ 
+    /* char mStr[64];
     sprintf(mStr,"speedL = %f \t speedR = %f \t  uswitchR = %d \n",extractBits(A,4,4),extractBits(A,3,3),  cvs->Sensors->uSwitchRight);
     MyConsole_SendMsg(mStr);*/
     
@@ -64,6 +68,7 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     int newTurn = extractBits(A,15,15);
     if(newTurn != previousTurn){        
         previousTurn = newTurn;
+        cvs->Tower->newTurn = true;
         cvs->Tower->nb_rising = nb_rising;
         cvs->Tower->nb_falling = nb_falling;
         cvs->Tower->nb_opponents = nb_opponents;
@@ -79,7 +84,7 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     if(newValue1 != previousValue1 || newValue2 != previousValue2){
         previousValue1 = newValue1;
         previousValue2 = newValue2;
-        double angleOffset = 12*DEGtoRAD - 20*DEGtoRAD;//5*M_PI/4;
+        double angleOffset = 12*DEGtoRAD - 35*DEGtoRAD;//5*M_PI/4;
         double angleRising = 2*M_PI*K/cvs->MotorTower->clicNumber + angleOffset;
         double angleFalling = 2*M_PI*L/cvs->MotorTower->clicNumber + angleOffset;
         while(angleRising > M_PI) angleRising = angleRising - 2*M_PI; //To work in [-pi; pi)
@@ -99,7 +104,11 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     }
     
     cvs->time = getTime() - cvs->timeOffset;
+/////////////////////////////////////////LT 24 /////////////////////////////////////////
 
+    //MyUpdateEcran(cvs,M);
+         
+         
     /*
     char theStr[512];
     sprintf(theStr,"SpeedL = %f \t SpeedR = %f \t SpeedOdoL = %f \t SpeedOdoR = %f \t \n", cvs->MotorL->speed, cvs->MotorR->speed, cvs->Odo->speedL, cvs->Odo->speedR);
@@ -261,6 +270,13 @@ void InitWebVariables(CtrlStruct *cvs){
     var27 = cvs->Param->radiusBot;
     var28 = 0;
     var29 = cvs->Param->maxAcceleration;
+    var30 = cvs->Obstacles->CircleList[0].x;
+    var31 = cvs->Obstacles->CircleList[0].y;
+    var32 = cvs->Obstacles->CircleList[0].isActive;
+    
+    var33 = cvs->Obstacles->CircleList[1].x;
+    var34 = cvs->Obstacles->CircleList[1].y;
+    var35 = cvs->Obstacles->CircleList[1].isActive;
     
     var1Status = var1;
     var2Status = var2;
@@ -350,12 +366,13 @@ void RefreshWebVariables(CtrlStruct *cvs){
     var27Status = cvs->Param->radiusBot;
     var28Status = var28;
     var29Status = cvs->Param->maxAcceleration;
-    var30Status = 0;
-    var31Status = 0;
-    var32Status = 0;
-    var33Status = 0;
-    var34Status = 0;
-    var35Status = 0;
+    var30Status = cvs->Obstacles->CircleList[0].x;
+    var31Status = cvs->Obstacles->CircleList[0].y;
+    var32Status = cvs->Obstacles->CircleList[0].isActive;
+    var33Status = cvs->Obstacles->CircleList[1].x;
+    var34Status = cvs->Obstacles->CircleList[1].y;
+    var35Status = cvs->Obstacles->CircleList[1].isActive;
+    
     var36Status = 0;
     var37Status = 0;
     var38Status = 0;

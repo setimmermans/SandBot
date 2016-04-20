@@ -18,7 +18,7 @@ void controller_init(CtrlStruct *cvs){
     cvs->previousTimeCAN = 0;
     cvs->timeOffset = 0;
 #ifdef REALBOT
-    cvs->robotID = GREEN;//PINK; //getRobotID();
+    cvs->robotID = GREEN;// PINK; //getRobotID();
     cvs->timeStep = TIMESTEP_REALBOT;
 #else
     cvs->robotID = cvs->inputs->robot_id;
@@ -31,18 +31,18 @@ void controller_init(CtrlStruct *cvs){
 	InitSensors(cvs);
 	InitObstacles(cvs);
 	InitTower(cvs);
-	InitGoals(cvs);
     InitDyna(cvs);
+    InitTowerFilters(cvs);
+    InitTimer(cvs);
+
 	int color = cvs->robotID;
 	cvs->stateCalib = Cal_y_arr;
-	cvs->stateReCalib = ReCal_rot1;
-	cvs->stateStrat = reachPointA;
     cvs->stateHomologation = PinceCalib;
     cvs->stateAction1 = GoToHouses;
     cvs->stateAction2 = GoToBlocOne;
     cvs->stateAction3 = GoToBlocTwoCalib;
     cvs->stateAction4 = GoToFish;
-    cvs->stateStrategy =  GoCalibration;//GoAction4;//
+    cvs->stateStrategy =  GoAction2;//GoCalibration;//GoAction4;//
 #ifdef REALBOT
     InitRegMotor(cvs->MotorL);
     InitRegMotor(cvs->MotorR);
@@ -60,70 +60,29 @@ void controller_init(CtrlStruct *cvs){
  */
 void controller_loop(CtrlStruct *cvs){
 	AlwaysInController(cvs);
-    /*
-    if(!var1Ok){
-        bool var1 = ReachPointPotential(cvs,-0.6,0.0,0.1);
-        var1Ok = var1;
-    }
-    else{
-        if(!var2Ok){
-            bool var2 = ReachPointPotential(cvs,-0.6,-1.2,0.1);
-            var2Ok = var2;
-        }
-        else{
-            if(!var3Ok){
-                bool var3 = ReachPointPotential(cvs,0.0,-1.0,0.1);
-                var3Ok = var3;
-            }
-            else{
-                if(!var4Ok){
-                    bool var4 = ReachPointPotential(cvs,0.0,-0.25,0.1);
-                    var4Ok = var4;
-                }
-                else{
-                    if(!var5Ok){
-                    bool var5 = ReachPointPotential(cvs,0.4,-1.1,0.1);
-                        var5Ok = var5;
-                    }
-                    else{
-                        if(!var6Ok){
-                            bool var6 = ReachPointPotential(cvs,0.8,-0.8,0.1);
-                            var6Ok = var6;
-                        }
-                        else{
-                            if(!var7Ok){
-                                bool var7 = ReachPointPotential(cvs,0.0,-0.25,0.1);
-                                var7Ok = var7;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }*/
-    //StrategyTest(cvs);
-    //PointHomologation(cvs);
-
     
-   cvs->Param->MotorCommandByHand = CommandMotorByHand;
-   if(cvs->Param->MotorCommandByHand)
-   {
-    cvs->MotorL->dutyCycle = LeftMotorDC;//RightMotorDC;
-    cvs->MotorR->dutyCycle = RightMotorDC;// RightMotorDC;
-    cvs->MotorTower->dutyCycle = TourelleDC;
-    cvs->MotorRatL->dutyCycle = RateauLDC; //RightMotorDC;//RightMotorDC;
-    cvs->MotorRatR->dutyCycle = RateauRDC; //RightMotorDC;//RightMotorDC;
-    cvs->MotorPince->dutyCycle = PinceDC;//RightMotorDC;*/   
-   }
-   else if(cvs->time > 200){
-       cvs->MotorL->dutyCycle = 0;//RightMotorDC;
+//#define WEBSITETEST
+#ifndef WEBSITETEST
+    
+    cvs->Param->MotorCommandByHand = CommandMotorByHand;
+    if(cvs->Param->MotorCommandByHand)
+    {
+     cvs->MotorL->dutyCycle = LeftMotorDC;//RightMotorDC;
+     cvs->MotorR->dutyCycle = RightMotorDC;// RightMotorDC;
+     cvs->MotorTower->dutyCycle = TourelleDC;
+     cvs->MotorRatL->dutyCycle = RateauLDC; //RightMotorDC;//RightMotorDC;
+     cvs->MotorRatR->dutyCycle = RateauRDC; //RightMotorDC;//RightMotorDC;
+     cvs->MotorPince->dutyCycle = PinceDC;//RightMotorDC;*/   
+    }
+    else if(cvs->time > 200){
+        cvs->MotorL->dutyCycle = 0;//RightMotorDC;
         cvs->MotorR->dutyCycle = 0;// RightMotorDC;
         cvs->MotorTower->dutyCycle = 0;
         cvs->MotorRatL->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
         cvs->MotorRatR->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
         cvs->MotorPince->dutyCycle = 0;//RightMotorDC;*/
-   }
-   else{
+    }
+    else{
 
           //   StartMyRat(cvs);
 
@@ -134,20 +93,29 @@ void controller_loop(CtrlStruct *cvs){
 
     //   ReachPointPotential(cvs, 0.8, 0.8, 0.03);
       //  DynaTestFunction(cvs);
-      if(cvs->time<5)
+     /* if(cvs->time<5)
       {
           RatGoBottom(cvs, cvs->MotorRatL);
           //MyStrategy(cvs);
       }
       else
       {
-            cvs->MotorTower->dutyCycle = 0;
+        // cvs->MotorTower->dutyCycle = 0;
          //MyStrategy(cvs);
-            DynaTestFunction(cvs);
-      }
+        // PointHomologation(cvs);
+          
+      }*/
+       // ReachPointPotential(cvs, 0.8, 0.8, 0.03);
+     //Calibration(cvs);
+      //Action2(cvs);
+      MyStrategy(cvs);
+       // PinceCalibration(cvs);
     }
        
-   
+#else
+      StrategyTest(cvs);
+#endif
+
     //PinceCalibration(cvs);
 
 	AlwaysEndController(cvs);
@@ -174,6 +142,10 @@ void controller_finish(CtrlStruct *cvs)
 	free(cvs->Obstacles);
 	free(cvs->Goals->ListOfGoals);
 	free(cvs->Goals);
+    free(cvs->AllFiltersTower->FilterTowerList);
+	free(cvs->AllFiltersTower);
+    free(cvs->TimerAction);
+    free(cvs->TimerCalibration);
 #ifdef REALBOT
     free(cvs->MotorRatL);
     free(cvs->MotorRatR);
@@ -181,7 +153,6 @@ void controller_finish(CtrlStruct *cvs)
 	free(cvs->DynaLeft);
 	free(cvs->DynaRight);
 #endif
-
 }
 
 void UpdateFromFPGA(CtrlStruct *cvs) {
@@ -208,7 +179,7 @@ void UpdateFromFPGA(CtrlStruct *cvs) {
 	cvs->Tower->nb_rising = cvs->inputs->nb_rising;
 	cvs->Tower->nb_rising_fixed = cvs->inputs->nb_rising_fixed;
 	cvs->Tower->tower_pos = cvs->inputs->tower_pos;
-
+	cvs->MotorTower->speed = fabs(cvs->Tower->tower_pos - cvs->Tower->tower_prevPos) / cvs->timeStep;
 	cvs->Tower->rising_index = cvs->inputs->rising_index;
 	cvs->Tower->rising_index_fixed = cvs->inputs->rising_index_fixed;
 	cvs->Sensors->uSwitchLeft = cvs->inputs->u_switch[L_ID];
