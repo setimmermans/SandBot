@@ -33,7 +33,7 @@ void MyStrategy(CtrlStruct *cvs)
                 bool succeed = Action1(cvs);
                     if(!cvs->TimerAction->isSet)
                     {
-                    SetTimer(cvs, cvs->TimerAction, 30);
+                    SetTimer(cvs, cvs->TimerAction, 15);
                     }
                     if(IsTimerTimout(cvs,cvs->TimerAction))
                     {
@@ -353,6 +353,7 @@ bool PinceCalibration(CtrlStruct *cvs){
         return false;
     }
     else{
+        cvs->MotorPince->dutyCycle=  0;
         cvs->MotorPince->position = 0;
         return true;
     }
