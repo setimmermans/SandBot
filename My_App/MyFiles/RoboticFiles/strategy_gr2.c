@@ -99,13 +99,13 @@ void MyStrategy(CtrlStruct *cvs)
                      }
                 break;
         }
-         case(GoActionParasol) :{
-                    bool succeed = ActionParasol(cvs);
-                    cvs->stateStrategy = GoBase;
-                break;
-        }
         case(GoBase) :{
-            ActionBase(cvs);
+        cvs->MotorL->dutyCycle = 0;
+        cvs->MotorR->dutyCycle = 0;
+        cvs->MotorRatR->dutyCycle = 0; 
+        cvs->MotorRatL->dutyCycle = 0;
+        cvs->MotorPince->dutyCycle = 0;
+            //ActionBase(cvs);
                 break;
         }
     default: break;
@@ -288,7 +288,7 @@ bool ClosePince(CtrlStruct *cvs, int duty){
         duty = 20;
     }
     cvs->MotorPince->dutyCycle = -duty;
-    if((cvs->MotorPince->speed == 0.0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
+    if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
         return true;
     }
     return false;
