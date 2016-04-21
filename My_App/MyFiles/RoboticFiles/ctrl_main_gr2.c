@@ -129,7 +129,7 @@ void controller_loop(CtrlStruct *cvs){
       //SetAngle(DynaRatL, 500);
         //ReadDyna(DynaPara);
        //PinceCalibration(cvs);
-        if(cvs->robotID == PINK){
+      /*  if(cvs->robotID == PINK){
             getTests(cvs);
             //InitDyna();
             SetAngle(DynaRatL, 0);
@@ -139,8 +139,11 @@ void controller_loop(CtrlStruct *cvs){
         else{
             //Action4(cvs);
             RatGoBottom(cvs, cvs->MotorRatL);
-        }
+        }*/
+        //PointHomologation(cvs);
+       getStrategy(cvs);
         //DynaTestFunction(cvs);
+
     }
        
 #else
@@ -251,7 +254,18 @@ void AlwaysInController(CtrlStruct *cvs) {
 }
 
 void AlwaysEndController(CtrlStruct *cvs) {
-	SendMotorCommand(cvs);
+	if(cvs->time >= 90){
+        cvs->MotorL->dutyCycle = 0;//RightMotorDC;
+        cvs->MotorR->dutyCycle = 0;// RightMotorDC;
+        cvs->MotorTower->dutyCycle = 0;
+        cvs->MotorRatL->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
+        cvs->MotorRatR->dutyCycle = 0; //RightMotorDC;//RightMotorDC;
+        cvs->MotorPince->dutyCycle = 0;//RightMotorDC;
+    }
+     /*if(cvs->Sensors->uSwitchPinceOut){
+        cvs->MotorPince->dutyCycle = 0;
+    }*/
+    SendMotorCommand(cvs);
 }
 
 #ifndef REALBOT
