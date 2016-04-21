@@ -457,7 +457,7 @@ bool Creneau(CtrlStruct *cvs){
     int color = cvs->robotID;
     if(color == GREEN){
         cvs->MotorL->dutyCycle = -10;
-        cvs->MotorR->dutyCycle = -5;
+        cvs->MotorR->dutyCycle = -7;
         if(cvs->Odo->theta > -90){
             cvs->MotorL->dutyCycle = 0;
             cvs->MotorR->dutyCycle = 0;
@@ -465,7 +465,7 @@ bool Creneau(CtrlStruct *cvs){
         }
     }
     else{
-        cvs->MotorL->dutyCycle = -5;
+        cvs->MotorL->dutyCycle = -7;
         cvs->MotorR->dutyCycle = -10;
         if(cvs->Odo->theta < 90){
             cvs->MotorL->dutyCycle = 0;
