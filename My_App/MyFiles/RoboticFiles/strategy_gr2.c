@@ -50,7 +50,7 @@ void MyStrategy(CtrlStruct *cvs)
                bool succeed = Action2(cvs);
                     if(!cvs->TimerAction->isSet)
                     {
-                    SetTimer(cvs, cvs->TimerAction, 20);
+                    SetTimer(cvs, cvs->TimerAction, 23);
                     }
                     if(IsTimerTimout(cvs,cvs->TimerAction))
                     {
@@ -69,7 +69,7 @@ void MyStrategy(CtrlStruct *cvs)
                       bool succeed = Action3(cvs);
                     if(!cvs->TimerAction->isSet)
                     {
-                    SetTimer(cvs, cvs->TimerAction, 45); // 35 on prend pas bien les blocs
+                    SetTimer(cvs, cvs->TimerAction, 60); // 35 on prend pas bien les blocs
                     }
                     if(IsTimerTimout(cvs,cvs->TimerAction))
                     {
@@ -288,7 +288,10 @@ bool ClosePince(CtrlStruct *cvs, int duty){
         duty = 20;
     }
     cvs->MotorPince->dutyCycle = -duty;
-    if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
+    if(((cvs->MotorPince->speed >= -3) && (!cvs->Sensors->uSwitchPinceOut)) && (cvs->MotorPince->position < -100)){
+        return true;
+    }
+    if(cvs->MotorPince->position < -345){
         return true;
     }
     return false;

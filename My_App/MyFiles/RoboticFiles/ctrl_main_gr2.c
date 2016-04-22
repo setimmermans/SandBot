@@ -100,7 +100,7 @@ void controller_loop(CtrlStruct *cvs){
         
        // getTests(cvs);
        
-        if(cvs->robotID == PINK){
+        /*if(cvs->robotID == PINK){
         cvs->MotorTower->dutyCycle = 0;
         cvs->MotorRatL->dutyCycle = 0; 
         cvs->MotorPince->dutyCycle = 0;    
@@ -120,7 +120,18 @@ void controller_loop(CtrlStruct *cvs){
             cvs->timeOffset = getTime();
             cvs->previousTime = 0;
             cvs->time = 0;
-        }  
+        }  */
+        if(cvs->robotID == GREEN){
+            //RatGoBottom(cvs, cvs->MotorRatL);
+            if(cvs->Sensors->uSwitchLeft){
+                ClosePince(cvs, 50);
+            }
+            else{
+                PinceCalibration(cvs);
+            }
+        }
+        else
+           MyStrategy(cvs);
 
     }
        
