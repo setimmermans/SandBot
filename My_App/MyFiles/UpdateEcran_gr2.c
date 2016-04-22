@@ -46,7 +46,7 @@ void getTests(CtrlStruct *cvs)
         cvs->MotorPince->dutyCycle = 0;    
         cvs->MotorL->dutyCycle = 0;
         cvs->MotorR->dutyCycle = 0;
-            (color == GREEN) ?  RatGoBottom(cvs, cvs->MotorRatL):RatGoTop(cvs, cvs->MotorRatR);
+            (color == GREEN) ?  RatGoBottom(cvs, cvs->MotorRatL):RatGoBottom(cvs, cvs->MotorRatR);
             break;
         }
         case(8) :
@@ -99,7 +99,8 @@ void getStrategy(CtrlStruct *cvs)
     switch(M){
         case(14) :
         {
-           // MyConsole_SendMsg("Homologation \n");
+            #define MAXSPEED M_PI;
+            #define MAXSPEEDROT 30*MAXSPEED
             PointHomologation(cvs);
             break;
         }
