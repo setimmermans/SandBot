@@ -120,7 +120,9 @@ void controller_loop(CtrlStruct *cvs){
         //ChooseBetweenMatchOrTest(cvs);
         //cvs->Param->ChooseToMatch
         //MyStrategy(cvs, 1);
-        Action4(cvs);
+        //Action4(cvs);
+        //MyConsole_SendMsg("demarrage\n");
+        MyStrategy(cvs, 0);
         /*if(1){
              MyStrategy(cvs, 0);
         }
