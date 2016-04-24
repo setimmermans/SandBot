@@ -22,8 +22,8 @@
 void MyMiniProjet_Task(void)
 {
 
-    MyConsole_SendMsg("here \n");
-    MyDelayMs(2000);
+    //MyConsole_SendMsg("here \n");
+    MyDelayMs(100);
     
     /*********************************
      *DO NOT TOUCH THAT **************
@@ -70,14 +70,20 @@ void MyMiniProjet_Task(void)
     while(1){
         unsigned int A = MyCyclone_Read(CYCLONE_IO_A_Data);
         unsigned int I = MyCyclone_Read(CYCLONE_IO_I_Data);
-        MyConsole_SendMsg("wtf \n");
+      //  MyConsole_SendMsg("wtf \n");
         bool start = (bool) extractBits(A,13,13);
         if(start){
-            MyConsole_SendMsg("Starting\n");
+            //MyConsole_SendMsg("Starting\n");
             cvs->timeOffset = getTime();
             cvs->previousTime = 0;
             cvs->time = 0;
+            char s1[128];
+            sprintf(s1, "Avant = %f\n", extractBits(A,13,13));
+            MyConsole_SendMsg(s1);
             while((bool) extractBits(A,13,13)){
+                char s2[128];
+                sprintf(s2, "Après = %f\n", extractBits(A,13,13));
+                MyConsole_SendMsg(s2);
                 MyConsole_Task();
                 //MyCAN_Task();
 #ifdef WEB
@@ -101,7 +107,7 @@ void MyMiniProjet_Task(void)
                         previousTimeData = currentTime;                     
 #ifdef WEB
                         /* Refresh Web Variables */
-                        RefreshWebVariables(cvs);
+                        //RefreshWebVariables(cvs);
 #endif
                         
 #ifdef SD_CARD

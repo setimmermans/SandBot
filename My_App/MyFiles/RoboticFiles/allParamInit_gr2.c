@@ -163,12 +163,13 @@ void InitParam(CtrlStruct *cvs) {
 	cvs->Param->totalErrorRot		= totalErrorRot_INIT;
 	cvs->Param->speedDifThreshold	= speedDifThreshold_INIT; //Max speed difference before considering the robot "at rest"
 	cvs->Param->KiAngleThreshold	= KiAngleThreshold_INIT; //Angle control: threshold to activate Ki1
-    cvs->Param->maxSpeed            = M_PI;
+    cvs->Param->maxSpeed            = 2*M_PI*1.5;
     cvs->Param->maxSpeedRot         = 30*cvs->Param->maxSpeed;
     cvs->Param->maxAcceleration     = maxAcceleration_INIT;
     cvs->Param->MotorCommandByHand = false;
     cvs->Param->PasFiletVisPince = PasFiletVisPince_INIT;
     cvs->Param->PasFiletVisRat = PasFiletVisRat_INIT;
+    cvs->Param->ChooseToMatch           = false;
 }
 
 void InitSensors(CtrlStruct *cvs) {
@@ -206,6 +207,9 @@ void InitTower(CtrlStruct * cvs)
     cvs->Tower->distance            = distance_INIT;
     cvs->Tower->angle               = angle_INIT;
     cvs->Tower->TooClose            = false;
+    cvs->Tower->ActivateTooClose    = true;
+    cvs->Tower->StrategyWithRushDunes   = false;
+    cvs->Tower->StrategyWithFish        = false;
 }
 
 
