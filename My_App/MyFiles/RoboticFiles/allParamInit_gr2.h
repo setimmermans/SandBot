@@ -41,8 +41,8 @@ NAMESPACE_INIT(ctrlGr2);
 	#define MaxAcceleration_DEFAULT	100
 #endif //REALBOT
 
-#define Kp_DEFAULT 0.3
-#define Ki_DEFAULT 5
+#define Kp_DEFAULT 0.3//0.62//0.3 //0.6
+#define Ki_DEFAULT 5//14.44//5 //15
 
 /************************************
  * MOTORS ***************************
