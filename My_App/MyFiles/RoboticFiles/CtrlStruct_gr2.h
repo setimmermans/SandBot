@@ -55,6 +55,7 @@ NAMESPACE_INIT(ctrlGr2);
 #define MAXSPEED_ENNEMYBOT 3
 #define NUMBER_WITHOUT_DETECTION_MAX 3
 #define MINDISTANCE_TOWER 0.70
+#define CONE_OPENING 30 //Angle of the half cone (30 degrees to left, 30 to right))
 //#define ACTIVATE_FIELDAVOIDANCE
 enum StateCalib {Cal_y_arr, GoToPoint, AlignAngle, Cal_x_arr, ReturnToBase, AlignForBase, ReturnInIt, Wait}; // GoToBlocOne, AlignBlocOne, TakeBlocOne, BringBlocOne, ReleaseBlockOne, AlignForBlockOne};
 enum StateDyna {grap, release};
@@ -230,7 +231,6 @@ typedef struct Tower {
 	int nb_falling_fixed; 
     double distance;
     double angle;
-    bool TooClose;
     bool ActivateTooClose;
     bool StrategyWithRushDunes;
     bool StrategyWithFish;
@@ -242,7 +242,8 @@ typedef struct FilterTower {
     int numberWithoutDetection;
 	double xList[TOWER_AVERAGING_NUMBER];
 	double yList[TOWER_AVERAGING_NUMBER];
-	bool detectedVeryClose;
+    bool tooCloseAhead;
+    bool tooCloseBehind;
     bool firstInit;
 } FilterTower;
 

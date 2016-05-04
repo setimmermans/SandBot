@@ -180,15 +180,31 @@ void MyStrategy(CtrlStruct *cvs, int dune)
             }
     default: break;
     }
-   int i;
+   
+   //DETECTION DE L'ADVERSAIRE
+    if(cvs->Tower->ActivateTooClose){
+        int i;
         for(i = 0; i < cvs->AllFiltersTower->numberOfEnnemy; i++){
-            if(cvs->AllFiltersTower->FilterTowerList[i].detectedVeryClose && cvs->Tower->ActivateTooClose){
-                cvs->MotorL->dutyCycle = 0;
-                cvs->MotorR->dutyCycle = 0;
-                cvs->MotorL->totalError = 0;
-                cvs->MotorR->totalError = 0;
+            // Case "Dection Ahead"
+            if(cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead){
+                if(((cvs->MotorL->dutyCycle > 0) || (cvs->MotorR->dutyCycle > 0)) && (cvs->MotorR->dutyCycle != -cvs->MotorL->dutyCycle)){ //Robot tends to go ahead and does not move on itself
+                    cvs->MotorL->dutyCycle = 0;
+                    cvs->MotorR->dutyCycle = 0;
+                    cvs->MotorL->totalError = 0;
+                    cvs->MotorR->totalError = 0;
+                }
+            }
+            // Case "Dection Behind"
+            if(cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind){
+                if(((cvs->MotorL->dutyCycle < 0) || (cvs->MotorR->dutyCycle < 0)) && (cvs->MotorR->dutyCycle != -cvs->MotorL->dutyCycle)){ //Robot tends to go behind and not move on itself
+                    cvs->MotorL->dutyCycle = 0;
+                    cvs->MotorR->dutyCycle = 0;
+                    cvs->MotorL->totalError = 0;
+                    cvs->MotorR->totalError = 0;
+                }
             }
         }
+    }
 }
 
 void ActivateBase(CtrlStruct *cvs) {
@@ -355,11 +371,23 @@ void PointHomologation(CtrlStruct *cvs){
 #ifndef ACTIVATE_FIELDAVOIDANCE
     int i;
     for(i = 0; i < cvs->AllFiltersTower->numberOfEnnemy; i++){
-        if(cvs->AllFiltersTower->FilterTowerList[i].detectedVeryClose && cvs->Tower->ActivateTooClose){
-            cvs->MotorL->dutyCycle = 0;
-            cvs->MotorR->dutyCycle = 0;
-            cvs->MotorL->totalError = 0;
-            cvs->MotorR->totalError = 0;
+        // Case "Dection Ahead"
+        if(cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead){
+            if(((cvs->MotorL->dutyCycle > 0) || (cvs->MotorR->dutyCycle > 0)) && (cvs->MotorR->dutyCycle != -cvs->MotorL->dutyCycle)){ //Robot tends to go ahead and does not move on itself
+                cvs->MotorL->dutyCycle = 0;
+                cvs->MotorR->dutyCycle = 0;
+                cvs->MotorL->totalError = 0;
+                cvs->MotorR->totalError = 0;
+            }
+        }
+        // Case "Dection Behind"
+        if(cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind){
+            if(((cvs->MotorL->dutyCycle < 0) || (cvs->MotorR->dutyCycle < 0)) && (cvs->MotorR->dutyCycle != -cvs->MotorL->dutyCycle)){ //Robot tends to go ahead and not move on itself
+                cvs->MotorL->dutyCycle = 0;
+                cvs->MotorR->dutyCycle = 0;
+                cvs->MotorL->totalError = 0;
+                cvs->MotorR->totalError = 0;
+            }
         }
     }
 #endif

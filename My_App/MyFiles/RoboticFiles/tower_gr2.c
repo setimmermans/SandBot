@@ -51,8 +51,11 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 			double distanceFromTower = ComputeDistance(cvs, risingIndex, fallingIndex);
 			double distance = distanceFromTower;
 			double angle = angleFromTower;
-            bool tooClose = (distance < MINDISTANCE_TOWER);
-            
+            //To know if the robot should stop
+            bool potentiallyTooCloseBehind = false;
+            bool potentiallyTooCloseAhead = false;
+            IsInCone(angle, distance, &potentiallyTooCloseBehind, &potentiallyTooCloseAhead);
+
             cvs->Tower->distance = distance ;
             cvs->Tower->angle    = angle;
             
@@ -60,7 +63,7 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 			double y = cvs->Odo->y + distance*sin(DEGtoRAD * (cvs->Odo->theta + angle));
 			if(IsBot(x, y)) { //!!! TO UNCOMMENT
 				if (numberUpdated < NumberOfCircles_INIT) { //If all bots have not been updated
-					FilterTowerBot(cvs, x, y, tooClose);
+					FilterTowerBot(cvs, x, y, potentiallyTooCloseBehind, potentiallyTooCloseAhead);
 					numberUpdated++;
 				}
 			}
@@ -70,7 +73,6 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 				if(cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection >= NUMBER_WITHOUT_DETECTION_MAX){
                     cvs->Obstacles->CircleList[i].isActive = false;
                     cvs->AllFiltersTower->FilterTowerList[i].firstInit = true;
-                    cvs->AllFiltersTower->FilterTowerList[i].detectedVeryClose = false;
                     cvs->AllFiltersTower->FilterTowerList[i].currentCountOutliers = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].currentIndex = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
@@ -88,9 +90,10 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 	}
 }
 
-void FilterTowerBot(CtrlStruct *cvs, double x, double y, bool tooClose) {
+void FilterTowerBot(CtrlStruct *cvs, double x, double y, bool tooCloseBehind, bool tooCloseAhead) {
 		int botNumber = FindCorrespondingBot(cvs,x,y);
-        cvs->AllFiltersTower->FilterTowerList[botNumber].detectedVeryClose = tooClose;
+        cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseAhead = tooCloseAhead;
+        cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseBehind = tooCloseBehind;
 		int currentIndex = cvs->AllFiltersTower->FilterTowerList[botNumber].currentIndex;
 		if (currentIndex >= TOWER_AVERAGING_NUMBER) {
 			AverageAndAddPosition(cvs, botNumber);
@@ -236,6 +239,25 @@ double ComputeDistance(CtrlStruct *cvs, int risingIndex, int fallingIndex) {
 	return distanceFromTower;
 }
 
+void IsInCone(double angle, double distance, bool *tooCloseBehind, bool *tooCloseAhead){
+    // CONE BEHIND
+    if((fabs(RADtoDEG*angle) > (180 - CONE_OPENING)) && (distance < MINDISTANCE_TOWER)){
+        *tooCloseBehind = true;
+        *tooCloseAhead = false;
+        return;
+    }
+    // CONE AHEAD
+    else if((fabs(RADtoDEG*angle) < CONE_OPENING) && (distance < MINDISTANCE_TOWER)){
+        *tooCloseBehind = false;
+        *tooCloseAhead = true;
+        return;
+    }
+    else{
+        *tooCloseBehind = false;
+        *tooCloseAhead = false;   
+        return;
+    }
+}
 #ifndef REALBOT
 NAMESPACE_CLOSE();
 #endif // ! REALBOT
