@@ -76,6 +76,8 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
                     cvs->AllFiltersTower->FilterTowerList[i].currentCountOutliers = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].currentIndex = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
+                    cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead = false;
+                    cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind = false;
                     int j;
                     for(j = 0; j < TOWER_AVERAGING_NUMBER; j++){
                         cvs->AllFiltersTower->FilterTowerList[i].xList[j] = - 10;
@@ -208,7 +210,7 @@ bool IsBot(double x, double y) {
 double ComputeAngle(CtrlStruct *cvs, int risingIndex, int fallingIndex) {
 	double firstAngle = cvs->Tower->last_rising[risingIndex];
 	double lastAngle = cvs->Tower->last_falling[fallingIndex];
-    double offset = 18.0;
+    double offset = 0;//18.0;
     
 	bool changeFlag = false;
 	if (firstAngle > M_PI / 2 && lastAngle < -M_PI / 2) {
@@ -221,7 +223,9 @@ double ComputeAngle(CtrlStruct *cvs, int risingIndex, int fallingIndex) {
 	}
 	double angleFromTower = (firstAngle + lastAngle) / 2;
 	if (changeFlag) angleFromTower = angleFromTower - 2 * M_PI;
-	return  RADtoDEG*angleFromTower - offset;
+	angleFromTower =  RADtoDEG*angleFromTower - offset;
+    if(angleFromTower < -180) angleFromTower += 360;
+    return angleFromTower;
 }
 
 double ComputeDistance(CtrlStruct *cvs, int risingIndex, int fallingIndex) {
@@ -239,15 +243,15 @@ double ComputeDistance(CtrlStruct *cvs, int risingIndex, int fallingIndex) {
 	return distanceFromTower;
 }
 
-void IsInCone(double angle, double distance, bool *tooCloseBehind, bool *tooCloseAhead){
+void IsInCone(double angle, double distance, bool *tooCloseBehind, bool *tooCloseAhead){    
     // CONE BEHIND
-    if((fabs(RADtoDEG*angle) > (180 - CONE_OPENING)) && (distance < MINDISTANCE_TOWER)){
+    if((fabs(angle) > (180.0 - CONE_OPENING)) && (distance < MINDISTANCE_TOWER)){
         *tooCloseBehind = true;
         *tooCloseAhead = false;
         return;
     }
     // CONE AHEAD
-    else if((fabs(RADtoDEG*angle) < CONE_OPENING) && (distance < MINDISTANCE_TOWER)){
+    else if((fabs(angle) < CONE_OPENING) && (distance < MINDISTANCE_TOWER)){
         *tooCloseBehind = false;
         *tooCloseAhead = true;
         return;
