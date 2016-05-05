@@ -63,7 +63,7 @@ void controller_loop(CtrlStruct *cvs){
 	AlwaysInController(cvs);
     int endtime = 160;
     int starttime = 0;
-#define WEBSITETEST
+//#define WEBSITETEST
 #ifndef WEBSITETEST
     cvs->Param->MotorCommandByHand = CommandMotorByHand;
     if(cvs->Param->MotorCommandByHand){

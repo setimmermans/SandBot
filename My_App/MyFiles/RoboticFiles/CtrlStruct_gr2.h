@@ -242,6 +242,7 @@ typedef struct FilterTower {
     int numberWithoutDetection;
 	double xList[TOWER_AVERAGING_NUMBER];
 	double yList[TOWER_AVERAGING_NUMBER];
+    bool detectedTooClose;
     bool tooCloseAhead;
     bool tooCloseBehind;
     bool firstInit;

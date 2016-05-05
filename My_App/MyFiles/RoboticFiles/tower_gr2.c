@@ -78,6 +78,7 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
                     cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
                     cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead = false;
                     cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind = false;
+                    cvs->AllFiltersTower->FilterTowerList[i].detectedTooClose = false;
                     int j;
                     for(j = 0; j < TOWER_AVERAGING_NUMBER; j++){
                         cvs->AllFiltersTower->FilterTowerList[i].xList[j] = - 10;
@@ -94,11 +95,24 @@ void UpdateDetectedBotPosition(CtrlStruct *cvs) {
 
 void FilterTowerBot(CtrlStruct *cvs, double x, double y, bool tooCloseBehind, bool tooCloseAhead) {
 		int botNumber = FindCorrespondingBot(cvs,x,y);
-        cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseAhead = tooCloseAhead;
-        cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseBehind = tooCloseBehind;
+        if(tooCloseBehind){
+            cvs->AllFiltersTower->FilterTowerList[botNumber].detectedTooClose = true;
+            cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseBehind = tooCloseBehind;
+        }
+        else if(tooCloseAhead){
+            cvs->AllFiltersTower->FilterTowerList[botNumber].detectedTooClose = true;
+            cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseAhead = tooCloseAhead;
+        }
+        else{
+            if(!cvs->AllFiltersTower->FilterTowerList[botNumber].detectedTooClose){
+                cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseBehind = tooCloseBehind;
+                cvs->AllFiltersTower->FilterTowerList[botNumber].tooCloseAhead = tooCloseAhead;
+            }
+        }
 		int currentIndex = cvs->AllFiltersTower->FilterTowerList[botNumber].currentIndex;
 		if (currentIndex >= TOWER_AVERAGING_NUMBER) {
 			AverageAndAddPosition(cvs, botNumber);
+            cvs->AllFiltersTower->FilterTowerList[botNumber].detectedTooClose = false;
 			currentIndex = 0;
 		} //Update bot position
         
@@ -116,7 +130,6 @@ void FilterTowerBot(CtrlStruct *cvs, double x, double y, bool tooCloseBehind, bo
 		}
 		cvs->AllFiltersTower->FilterTowerList[botNumber].currentIndex = currentIndex;
 }
-
 
 int FindCorrespondingBot(CtrlStruct *cvs, double x, double y) {
 	int index = 0;

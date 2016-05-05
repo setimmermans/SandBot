@@ -425,6 +425,7 @@ void InitTowerFilters(CtrlStruct *cvs) {
 		cvs->AllFiltersTower->FilterTowerList[i].currentCountOutliers = 0;
 		cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead = false;
         cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind = false;
+        cvs->AllFiltersTower->FilterTowerList[i].detectedTooClose = false;
         cvs->AllFiltersTower->FilterTowerList[i].firstInit = true;
         cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
 		for (j = 0; j < TOWER_AVERAGING_NUMBER; j++) {
