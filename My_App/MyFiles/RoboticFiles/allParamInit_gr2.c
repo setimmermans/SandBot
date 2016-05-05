@@ -162,11 +162,15 @@ void InitParam(CtrlStruct *cvs) {
 	cvs->Param->KiRot				= KiRot_INIT;
 	cvs->Param->totalErrorRot		= totalErrorRot_INIT;
 	cvs->Param->speedDifThreshold	= speedDifThreshold_INIT; //Max speed difference before considering the robot "at rest"
-	cvs->Param->KiAngleThreshold	= KiAngleThreshold_INIT; //Angle control: threshold to activate Ki
+	cvs->Param->KiAngleThreshold	= KiAngleThreshold_INIT; //Angle control: threshold to activate Ki1
+    cvs->Param->maxSpeed            = 2*M_PI*1.5;
+    cvs->Param->maxSpeedRot         = 30*cvs->Param->maxSpeed;
     cvs->Param->maxAcceleration     = maxAcceleration_INIT;
     cvs->Param->MotorCommandByHand = false;
     cvs->Param->PasFiletVisPince = PasFiletVisPince_INIT;
     cvs->Param->PasFiletVisRat = PasFiletVisRat_INIT;
+    cvs->Param->ChooseToMatch           = false;
+    cvs->Param->start                   =false;
 }
 
 void InitSensors(CtrlStruct *cvs) {
@@ -201,7 +205,13 @@ void InitTower(CtrlStruct * cvs)
 	cvs->Tower->rising_index_fixed	= rising_index_fixed_INIT;
 	cvs->Tower->tower_pos			= tower_pos_INIT;
 	cvs->Tower->tower_prevPos		= cvs->Tower->tower_pos;
+    cvs->Tower->distance            = distance_INIT;
+    cvs->Tower->angle               = angle_INIT;
+    cvs->Tower->ActivateTooClose    = true;
+    cvs->Tower->StrategyWithRushDunes   = false;
+    cvs->Tower->StrategyWithFish        = false;
 }
+
 
 void InitPotential(CtrlStruct *cvs) {
 	cvs->Poto = (Potential*)malloc(sizeof(Potential));
@@ -218,12 +228,8 @@ void InitPotential(CtrlStruct *cvs) {
 
 void InitOdometry(CtrlStruct *cvs) {
 	cvs->Odo = (Odometry*)malloc(sizeof(Odometry));
-	cvs->Odo->timein = 0;
-	cvs->Odo->timeDelay = 0.0;
     cvs->Odo->speedL = 0;
     cvs->Odo->speedR = 0;
-    cvs->Odo->bufferTime = -100000;
-    cvs->Odo->flagBufferPosition = 0;
 	int color = cvs->robotID;
 #ifdef REALBOT
     cvs->Odo->clicNumber = clicNumberOdo_INIT;
@@ -275,63 +281,8 @@ void InitOdometry(CtrlStruct *cvs) {
 		cvs->Odo->y		= 0;
 		cvs->Odo->theta = 0;
 	}
-
 #endif // REALBOT
 }
-
-void InitGoals(CtrlStruct *cvs) {
-	cvs->Goals = (Goals*)malloc(sizeof(Goals));
-	cvs->Goals->NumberOfGoals = MaxGoals;
-	cvs->Goals->ListOfGoals = (Points*)malloc(sizeof(Points)*MaxGoals);
-	int color = cvs->robotID;
-	cvs->stateVia = normalPoint;
-
-	//3 pts
-	cvs->Goals->ListOfGoals[0].X = -0.6;
-	cvs->Goals->ListOfGoals[0].Y = (color == BLUE || color == RED) ? 0.05 : -0.05;
-	cvs->Goals->ListOfGoals[0].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[1].X = -0.65;
-	cvs->Goals->ListOfGoals[1].Y = (color == BLUE || color == RED) ? -1.25 : 1.25;
-	cvs->Goals->ListOfGoals[1].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[2].X = 0.4;
-	cvs->Goals->ListOfGoals[2].Y = (color == BLUE || color == RED) ? -1.1 : 1.1;
-	cvs->Goals->ListOfGoals[2].taken = false;
-	//2 pts
-	cvs->Goals->ListOfGoals[3].X = 0.85;
-	cvs->Goals->ListOfGoals[3].Y = (color == BLUE || color == RED) ? -0.8 : 0.8;
-	cvs->Goals->ListOfGoals[3].taken = false;
-	//2 pts
-	cvs->Goals->ListOfGoals[4].X = 0.85;
-	cvs->Goals->ListOfGoals[4].Y = (color == BLUE || color == RED) ? 0.9 : -0.9;
-	cvs->Goals->ListOfGoals[4].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[5].X = 0.38;
-	cvs->Goals->ListOfGoals[5].Y = (color == BLUE || color == RED) ? 1.15 : -1.15;
-	cvs->Goals->ListOfGoals[5].taken = false;
-	//1 pts
-	cvs->Goals->ListOfGoals[6].X = -0.65;
-	cvs->Goals->ListOfGoals[6].Y = (color == BLUE || color == RED) ? 1.25 : -1.25;
-	cvs->Goals->ListOfGoals[6].taken = false;
-
-	cvs->Goals->precision = goalprecision_INIT;
-	cvs->Goals->CurrentGoal = firstgoal_INIT;
-	cvs->Goals->previousGoal = firstgoal_INIT;
-	cvs->Goals->via = false;
-	cvs->Goals->endConstr = false;
-	cvs->Goals->inConstr = false;
-	cvs->Goals->lockState = -1;
-	cvs->Goals->endParcourt = false;
-	cvs->Goals->backHome = false;
-	cvs->Goals->timeIN = 0.0;
-	cvs->Goals->maxtimewait =  maxtimewait_INIT;
-	cvs->Goals->isblocked = false;
-	cvs->Goals->goalIN = 0;
-	cvs->Goals->over = false;
-	cvs->Goals->nbr_target_prev = 0;
-}
-
 
 void InitObstacles(CtrlStruct *cvs) {
 	cvs->Obstacles = (Obstacles*)malloc(sizeof(Obstacles));
@@ -357,13 +308,13 @@ void InitObstacles(CtrlStruct *cvs) {
 
 	int color = cvs->robotID;
 	//MidAreaGreenSide
-	cvs->Obstacles->QuarterOfCircleList[0].isActive = ((color == WHITE) || (color == YELLOW)) ? false : true;
+	cvs->Obstacles->QuarterOfCircleList[0].isActive = ((color == GREEN)) ? false : true;
 	cvs->Obstacles->QuarterOfCircleList[0].quadrant = 1;
 	cvs->Obstacles->QuarterOfCircleList[0].radius = 0.6;
 	cvs->Obstacles->QuarterOfCircleList[0].x = -0.25;
 	cvs->Obstacles->QuarterOfCircleList[0].y = 0;
 	//MidAreaBlueSide
-	cvs->Obstacles->QuarterOfCircleList[1].isActive = ((color == BLUE) || (color == RED)) ? false : true;
+	cvs->Obstacles->QuarterOfCircleList[1].isActive = ((color == PINK)) ? false : true;
 	cvs->Obstacles->QuarterOfCircleList[1].quadrant = 4;
 	cvs->Obstacles->QuarterOfCircleList[1].radius = 0.6;
 	cvs->Obstacles->QuarterOfCircleList[1].x = -0.25;
@@ -446,7 +397,7 @@ void InitObstacles(CtrlStruct *cvs) {
 	cvs->Obstacles->RectangleList[9].height = 0.01;
 }
 
-void InitDyna(CtrlStruct *cvs){
+/*void InitDyna(CtrlStruct *cvs){
 #ifdef REALBOT
     cvs->DynaLeft = (Dyna*)malloc(sizeof(Dyna));
     cvs->DynaLeft->timer = 0;
@@ -461,7 +412,8 @@ void InitDyna(CtrlStruct *cvs){
     SendMessageDyna(0x06,0x0005,0x0008,0x0000);
     SendMessageDyna(0x06,0x0005,0x0019,0x1);
 #endif
-}
+}*/
+
 void InitTowerFilters(CtrlStruct *cvs) {
 	cvs->AllFiltersTower = (AllFiltersTower*)malloc(sizeof(AllFiltersTower));
 	cvs->AllFiltersTower->numberOfEnnemy = NumberOfCircles_INIT;
@@ -471,7 +423,9 @@ void InitTowerFilters(CtrlStruct *cvs) {
 	for (i = 0; i < NumberOfCircles_INIT; i++) {
 		cvs->AllFiltersTower->FilterTowerList[i].currentIndex = 0;
 		cvs->AllFiltersTower->FilterTowerList[i].currentCountOutliers = 0;
-		cvs->AllFiltersTower->FilterTowerList[i].detectedVeryClose = false;
+		cvs->AllFiltersTower->FilterTowerList[i].tooCloseAhead = false;
+        cvs->AllFiltersTower->FilterTowerList[i].tooCloseBehind = false;
+        cvs->AllFiltersTower->FilterTowerList[i].detectedTooClose = false;
         cvs->AllFiltersTower->FilterTowerList[i].firstInit = true;
         cvs->AllFiltersTower->FilterTowerList[i].numberWithoutDetection = 0;
 		for (j = 0; j < TOWER_AVERAGING_NUMBER; j++) {
@@ -481,6 +435,27 @@ void InitTowerFilters(CtrlStruct *cvs) {
 	}
 }
 
+void InitTimer(CtrlStruct *cvs){
+    cvs->TimerAction = (MyTimer*)malloc(sizeof(MyTimer));
+    cvs->TimerAction->beginTime = 0;
+    cvs->TimerAction->endTime = 0;
+    cvs->TimerAction->isSet = false;
+    
+    cvs->TimerCalibration = (MyTimer*)malloc(sizeof(MyTimer));
+    cvs->TimerCalibration->beginTime = 0;
+    cvs->TimerCalibration->endTime = 0;
+    cvs->TimerCalibration->isSet = false;
+
+    cvs->TimerReleaseBlocksAvance = (MyTimer*)malloc(sizeof(MyTimer));
+    cvs->TimerReleaseBlocksAvance->beginTime = 0;
+    cvs->TimerReleaseBlocksAvance->endTime = 0;
+    cvs->TimerReleaseBlocksAvance->isSet = false;
+
+    cvs->TimerReleaseBlocksRecule = (MyTimer*)malloc(sizeof(MyTimer));
+    cvs->TimerReleaseBlocksRecule->beginTime = 0;
+    cvs->TimerReleaseBlocksRecule->endTime = 0;
+    cvs->TimerReleaseBlocksRecule->isSet = false;
+}
 #ifndef REALBOT
 NAMESPACE_CLOSE();
 #endif // ! REALBOT

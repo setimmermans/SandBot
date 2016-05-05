@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+ //----------------------------------------------------------------------
 // Module making the interface between the NIOS and the module UART_TXT
 // It reads and writes in registers exported from the NIOS
 //-----------------------------------------------------------------------
@@ -203,7 +203,7 @@ module UART_Dynamixel_RXD (
 	input logic					clk, reset, start_communication, RXD,
 	output logic				data_ready, fail_reg,
 	output logic [31:0] 		data1, data2,
-	output logic [31:0] data_useful
+	output logic [31:0]     data_useful
 );
 
 typedef enum logic [2:0] {S0,S1,S2,S3} statetype;
@@ -304,11 +304,12 @@ always_ff @(posedge clk) begin
 end
 always_ff @(posedge data_ready, posedge reset) begin
 	if(reset)begin
-		data_useful <= 32'b0;
+		data_useful <= 32'b11111111;
 	end
 	else begin
 		data_useful[7:0] <= ID;
-		data_useful[15:8] <= Length;
+		//data_useful[7:0] <= 8'b11111111;
+		data_useful[15:8] <= Error; //Length;
 		data_useful[23:16] <= P1;
 		data_useful[31:24] <= P2;
 	end
@@ -328,7 +329,7 @@ always @(posedge clk or posedge reset) begin
 	else begin
 		cnt <= cnt + 10'b1;
 		//if(cnt == 10'd875) begin		
-		if(cnt == 10'd868) begin		//868
+		if(cnt == 10'd875) begin		//868
 			cnt <= 10'b0;
 		end
 	end 

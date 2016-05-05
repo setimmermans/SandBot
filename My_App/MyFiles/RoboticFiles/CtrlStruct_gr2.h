@@ -46,24 +46,29 @@ NAMESPACE_INIT(ctrlGr2);
 #define EPSILON 0.000001
 
 #define LIMITACCELERATION 1
-#define MAXSPEED 2*M_PI
-#define MAXSPEEDROT 30*MAXSPEED
-
 #define KIFLUSHLIMIT 1000
-#define MaxGoals 15
 
-#define TOWER_AVERAGING_NUMBER 2
+
+#define TOWER_AVERAGING_NUMBER 1
 #define TOWER_OUTLIERS_COMPARE 1
 #define BEACON_POSITION_TOLERANCE 0.1
 #define MAXSPEED_ENNEMYBOT 3
 #define NUMBER_WITHOUT_DETECTION_MAX 3
-//enum StateCalib {Cal_y_arr, Cal_y_arr2, Cal_y_av, Cal_y_av1, Cal_rot_neg, Cal_x_arr, Cal_x_av, Cal_rot_pos, Action1 };
-enum StateCalib {Cal_y_arr, GoToPoint, AlignAngle, Cal_x_arr, ReturnToBase, AlignForBaseAndReturnInIt, Wait}; // GoToBlocOne, AlignBlocOne, TakeBlocOne, BringBlocOne, ReleaseBlockOne, AlignForBlockOne};
+#define MINDISTANCE_TOWER 0.70
+#define CONE_OPENING 80 //Angle of the half cone (30 degrees to left, 30 to right))
+//#define ACTIVATE_FIELDAVOIDANCE
+enum StateCalib {Cal_y_arr, GoToPoint, AlignAngle, Cal_x_arr, ReturnToBase, AlignForBase, ReturnInIt, Wait}; // GoToBlocOne, AlignBlocOne, TakeBlocOne, BringBlocOne, ReleaseBlockOne, AlignForBlockOne};
 enum StateDyna {grap, release};
 enum StateVia {backHomeViaBase, backHomeStraight, normalPoint, viaPoint};
 enum StateHomologation {PinceCalib, reachViaPoint, AlignWithTheta, ReachBlocs, ClosingPince, GoViaZone, AlignZone, GoInZone, OpeningPince};
-enum StateAction1{GoToBlocOne, AlignForBlocOne, TakeBlocOne, BringBlockOne, ReleaseBlockOne, AlignForBlockOne};
-enum StateAction2{GoToBlocTwo, AlignForBlocTwo, AvanceForBlockTwo, ReculeForBlockTwo, BringBlockTwoViaPoint, TakeBlocTwo, BringBlockTwo, ReleaseBlockTwo, AlignForBlockTwo};
+enum StateAction1{GoToHouse1, GoToHouse1Precision, AlignedWithHouse1, PushHouse1, FreeHouse1, GoToHouse2Precision, AlignedWithHouse2, PushHouse2, FreeHouse2};
+enum StateAction2{GoToBlocOne, AlignForBlocOne, TakeBlocOne, BringBlockOne, ReleaseBlockOne, AlignForBlockOne,EndBlocOneViaPoint};
+enum StateAction3{CalibY, AlignForCalibYblocTwo, Calib_yBlocTwo, GoToBlocTwoCalib, AlignForCalibAction3, Calib_x, GoToBlocTwo, GoToBlocTwoPrecision, AlignForBlocTwo,AlignForBlocTwoPrecision, AvanceForBlockTwo, ReculeForBlockTwo, TestIfBlockAction3, BringBlockTwoViaPoint, TakeBlocTwo, BringBlockTwo, ReleaseBlockTwo, AlignForBlockTwo};
+enum StateAction4{GoCalibY_Action4, AlignCalibY_Action4, calibY_Action4, GoToFish, AlignForCalibFishes, CalibFishes, DecaleBordFishes, AlignForCreneau, DoTheCreneau, AlignedWithFishes,RatGoTopStartFish, DyntakeFish1, RatDescend, DyntakeFish2, Avance, DyntakeFish3, RatGoUp, DecaleWithFishes, Recule, MoveWithFish, AlignedWithNet, ReleaseFish};
+enum StateAction5{GotoDuneViaPoint, GotoDune,GotoDunePrecision, AlignedForDune, AlignedForDunePrecision, AvanceForBlocs, CloseForDune,DesAlignedForDune, Calib_x_Action5, GoToViaPoint, GoToViaPoint2,AlignForDune, DeposeDune};
+enum StateStrategy{GoCalibration, GoAction1, GoAction2, GoAction3,GoAction4, GoAction5, GoBase};
+
+
 typedef struct Potential {
 	double katt;
 	double krep;
@@ -76,15 +81,11 @@ typedef struct Potential {
 } Potential;
 
 typedef struct Odometry {
-	double timein;
-	int timeDelay;
 	double x;
 	double y;
 	double theta;
     double speedL;
     double speedR;
-    double bufferTime;
-    double flagBufferPosition;
 #ifdef REALBOT
     double clicNumber;
 #endif // REALBOT
@@ -103,10 +104,14 @@ typedef struct Parametres {
 	double speedDifThreshold;
 	double KiAngleThreshold;
 	double rayonBeacon;
+    double maxSpeed;
+    double maxSpeedRot;
     double maxAcceleration;
     bool MotorCommandByHand;
     double PasFiletVisRat;
     double PasFiletVisPince;
+    bool ChooseToMatch;
+    bool start;
 } Parametres;
 
 typedef struct Sensors {
@@ -224,6 +229,11 @@ typedef struct Tower {
 	int falling_index_fixed; 
 	int nb_rising_fixed;  
 	int nb_falling_fixed; 
+    double distance;
+    double angle;
+    bool ActivateTooClose;
+    bool StrategyWithRushDunes;
+    bool StrategyWithFish;
 } Tower;
 
 typedef struct FilterTower {
@@ -232,7 +242,9 @@ typedef struct FilterTower {
     int numberWithoutDetection;
 	double xList[TOWER_AVERAGING_NUMBER];
 	double yList[TOWER_AVERAGING_NUMBER];
-	bool detectedVeryClose;
+    bool detectedTooClose;
+    bool tooCloseAhead;
+    bool tooCloseBehind;
     bool firstInit;
 } FilterTower;
 
@@ -241,9 +253,16 @@ typedef struct AllFiltersTower {
 	FilterTower *FilterTowerList;
 } AllFiltersTower;
 
+typedef struct MyTimer{
+    double beginTime;
+    double endTime;
+    bool isSet;
+} MyTimer;
+
 /// Main controller structure
 typedef struct CtrlStruct
 {
+    bool colorIsSet;
     double previousTimeCAN;
     int robotID;
     double previousTime;
@@ -259,6 +278,10 @@ typedef struct CtrlStruct
     enum StateHomologation stateHomologation;
     enum StateAction1 stateAction1;
     enum StateAction2 stateAction2;
+    enum StateAction3 stateAction3;
+    enum StateAction4 stateAction4;
+    enum StateAction5 stateAction5;
+    enum StateStrategy stateStrategy;
 	Parametres *Param;
 	Potential *Poto;
 	Odometry *Odo;
@@ -277,6 +300,10 @@ typedef struct CtrlStruct
 	Tower *Tower;
 	Goals *Goals;
 	AllFiltersTower *AllFiltersTower;
+    MyTimer *TimerAction;
+    MyTimer *TimerCalibration;
+    MyTimer *TimerReleaseBlocksAvance;
+    MyTimer *TimerReleaseBlocksRecule;
 } CtrlStruct;
 
 

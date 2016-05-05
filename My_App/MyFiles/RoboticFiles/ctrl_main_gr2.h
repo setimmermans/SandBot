@@ -24,6 +24,7 @@
 #include "controller_gr2.h"
 #include "tower_gr2.h"
 #include <math.h>
+#include "../UpdateEcran_gr2.h"
 
 #ifndef REALBOT
 NAMESPACE_INIT(ctrlGr2);
@@ -35,7 +36,7 @@ void	controller_finish(CtrlStruct *cvs);
 
 void	UpdateFromFPGA(CtrlStruct *cvs);
 void	AlwaysInController(CtrlStruct *cvs);
-void	AlwaysEndController(CtrlStruct *cvs);
+void	AlwaysEndController(CtrlStruct *cvs, double endtime);
 
 
 #ifndef REALBOT

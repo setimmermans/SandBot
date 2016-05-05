@@ -40,7 +40,7 @@ void Action5Test(CtrlStruct *cvs){
     PointHomologation(cvs);
 }
 void Action6Test(CtrlStruct *cvs){
-    ClosePince(cvs);
+    ClosePince(cvs, 40);
 } 
 void Action7Test(CtrlStruct *cvs){
     cvs->MotorPince->dutyCycle = var39;
@@ -67,14 +67,14 @@ void Action11Test(CtrlStruct *cvs){
                 cvs->DynaLeft->enable = true;
             }
             else if(cvs->time - cvs->DynaLeft->timer < 4){
-                TurnCCW(20);
-                sprintf(s,"GoTurn\n");
+                TurnCCW(0xFE, 20);
+              //  sprintf(s,"GoTurn\n");
                 MyConsole_SendMsg(s);
             }
             else{
-                sprintf(s,"StopTurn\n");
+              //  sprintf(s,"StopTurn\n");
                 MyConsole_SendMsg(s);
-                StopTurn(1);
+                StopTurn(0xFE, 1);
                 cvs->DynaLeft->stateDyna = release;
                 cvs->DynaLeft->enable = false;
             }
@@ -85,14 +85,14 @@ void Action11Test(CtrlStruct *cvs){
                 cvs->DynaLeft->enable = true;
             }
             else if(cvs->time - cvs->DynaLeft->timer < 4){
-                TurnCW(20);
-                sprintf(s,"GoTurn\n");
+                TurnCW(0xFE, 20);
+               // sprintf(s,"GoTurn\n");
                 MyConsole_SendMsg(s);
             }
             else{
-                sprintf(s,"StopTurn\n");
+                //sprintf(s,"StopTurn\n");
                 MyConsole_SendMsg(s);
-                StopTurn(0);
+                StopTurn(0xFE, 0);
                 cvs->DynaLeft->stateDyna = grap;
             }
     }
@@ -159,56 +159,6 @@ void StrategyTest(CtrlStruct *cvs){
         Action14Test(cvs);
     }
 }
-
-//ok
-bool PinceCalibration(CtrlStruct *cvs){
-    if(!cvs->Sensors->uSwitchPinceOut){
-        SpeedRefToDC(cvs, cvs->MotorPince, 45);
-        return false;
-    }
-    else{
-        cvs->MotorPince->position = 0;
-        return true;
-    }
-}
-
-bool ClosePince(CtrlStruct *cvs){
-    if(cvs->MotorPince->position < -400){
-        cvs->MotorPince->dutyCycle = 0;
-        return true;
-    }
-    else
-        cvs->MotorPince->dutyCycle = -40;
-
-    if((cvs->MotorPince->speed == 0) && (!cvs->Sensors->uSwitchPinceOut) && (cvs->MotorPince->position < -100)){
-        return true;
-    }
-    return false;
-}
-
-bool DeposeBlock(CtrlStruct *cvs){
-    bool isOpen;
-    
-    if(cvs->Odo->bufferTime > cvs->time - 1){
-        cvs->MotorL->dutyCycle = 25;
-        cvs->MotorR->dutyCycle = 25;
-        isOpen = PinceCalibration(cvs);
-        return false;
-    }
-    else if (cvs->Odo->bufferTime > cvs->time - 2){
-        cvs->Odo->flagBufferPosition == 1;
-        cvs->MotorL->dutyCycle = -25;
-        cvs->MotorR->dutyCycle = -25;
-        isOpen = PinceCalibration(cvs);
-        return false;
-    }
-    if(cvs->Odo->flagBufferPosition == 1 && (cvs->Odo->bufferTime > cvs->time - 3)){
-        cvs->Odo->flagBufferPosition = 0;
-        cvs->Odo->bufferTime = -100000;
-        return true;
-    }
-}
-
 
 #endif // REALBOT
 

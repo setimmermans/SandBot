@@ -1,4 +1,5 @@
 #include "interfaceFPGA.h"
+#include "UpdateEcran_gr2.h"
 #include "RoboticFiles/CtrlStruct_gr2.h"
 int previousTurn = 0;
 int previousSomethingDetected = 0;
@@ -27,6 +28,8 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     unsigned int K = MyCyclone_Read(CYCLONE_IO_K_Data);
     unsigned int L = MyCyclone_Read(CYCLONE_IO_L_Data);
     
+    unsigned int M = MyCyclone_Read(CYCLONE_IO_M_Data);
+    
 #ifdef MINIBOT
     cvs->MotorR->speed = ComputeSpeed(cvs->MotorL->clicNumber,C,extractBits(A,1,1));
     cvs->MotorL->speed = ComputeSpeed(cvs->MotorR->clicNumber,B,extractBits(A,2,2));
@@ -40,21 +43,27 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
 #endif
 
     cvs->MotorPince->speed = ComputeSpeed(cvs->MotorPince->clicNumber,F,!extractBits(A,5,5));
-    cvs->MotorRatL->speed = ComputeSpeed(cvs->MotorRatL->clicNumber,G,extractBits(A,3,3));
-    cvs->MotorRatR->speed = ComputeSpeed(cvs->MotorRatR->clicNumber,H,extractBits(A,4,4));
+    cvs->MotorRatL->speed = ComputeSpeed(cvs->MotorRatL->clicNumber,H,!extractBits(A,4,4));
+    cvs->MotorRatR->speed = ComputeSpeed(cvs->MotorRatR->clicNumber,G,!extractBits(A,3,3));
     cvs->MotorTower->speed = ComputeSpeed(cvs->MotorTower->clicNumber,I,1);
-
+ 
+    /* char mStr[64];
+    sprintf(mStr,"speedL = %f \t speedR = %f \t  uswitchR = %d \n",extractBits(A,4,4),extractBits(A,3,3),  cvs->Sensors->uSwitchRight);
+    MyConsole_SendMsg(mStr);*/
+    
 #ifdef MINIBOT
-   /* MyCAN_USwitch(&(cvs->Sensors->uSwitchLeft), &(cvs->Sensors->uSwitchRight));
+   // MyCAN_USwitch(&(cvs->Sensors->uSwitchLeft), &(cvs->Sensors->uSwitchRight));
     char theStr[64];
-    sprintf(theStr,"uSL = %d \t uSR = %d \t \n", cvs->Sensors->uSwitchLeft, cvs->Sensors->uSwitchRight);
-    MyConsole_SendMsg(theStr);*/
+    sprintf(theStr,"speedL = %f \t uSR = %d \t \n", cvs->Sensors->uSwitchLeft, cvs->Sensors->uSwitchRight);
+    MyConsole_SendMsg(theStr);
 #else
     cvs->Sensors->uSwitchLeft = (bool) extractBits(A,8,8);
     cvs->Sensors->uSwitchRight = (bool) extractBits(A,9,9);
 #endif // MINIBOT
     cvs->Sensors->uSwitchPinceOut = !((bool) extractBits(A,10,10));
-
+//    cvs->Sensors->uSwitchPinceIn = (bool) extractBits(A,11,11);
+    cvs->Sensors->uSwitchRatL = (bool) extractBits(A,12,12);
+    cvs->Sensors->uSwitchRatR = !(bool) extractBits(A,11,11); 
     
     /* TOWER */
     int newTurn = extractBits(A,15,15);
@@ -76,7 +85,7 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     if(newValue1 != previousValue1 || newValue2 != previousValue2){
         previousValue1 = newValue1;
         previousValue2 = newValue2;
-        double angleOffset = 12*DEGtoRAD - 20*DEGtoRAD;//5*M_PI/4;
+        double angleOffset = 12*DEGtoRAD - 35*DEGtoRAD;//5*M_PI/4;
         double angleRising = 2*M_PI*K/cvs->MotorTower->clicNumber + angleOffset;
         double angleFalling = 2*M_PI*L/cvs->MotorTower->clicNumber + angleOffset;
         while(angleRising > M_PI) angleRising = angleRising - 2*M_PI; //To work in [-pi; pi)
@@ -96,7 +105,10 @@ void UpdateFromFPGARealBot(CtrlStruct *cvs){
     }
     
     cvs->time = getTime() - cvs->timeOffset;
+/////////////////////////////////////////LT 24 /////////////////////////////////////////
 
+         
+         
     /*
     char theStr[512];
     sprintf(theStr,"SpeedL = %f \t SpeedR = %f \t SpeedOdoL = %f \t SpeedOdoR = %f \t \n", cvs->MotorL->speed, cvs->MotorR->speed, cvs->Odo->speedL, cvs->Odo->speedR);
@@ -122,11 +134,6 @@ double getTime(){
     }
     time = time + timeGlitch;
     return time;
-}
-
-int getRobotID(){
-    unsigned int A = MyCyclone_Read(CYCLONE_IO_A_Data);
-    return extractBits(A,0,0);
 }
 
 double ComputeSpeed(double clicNumber, unsigned int numberOfClic, int positiveSpeed){

@@ -1,0 +1,19 @@
+Reset = 1;
+Calib X = 2
+Calib y = 3
+Vert = 4
+Violet = 5
+monter rateau = 6
+descendre rateau = 7
+ouvrir pince = 8
+fermer pince = 9
+avant roues = 10
+arrière roues = 11
+tourelle horl = 12
+tourelle anti-holr = 13
+homologation = 14
+match = 15
+petit chateau = 16 
+cabines = 17
+dune = 18
+poisson = 19 parasol = 20

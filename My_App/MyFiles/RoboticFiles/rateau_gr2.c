@@ -33,46 +33,86 @@ NAMESPACE_INIT(ctrlGr2);
   
   bool RatGoTop(CtrlStruct *cvs, Motor *Motor){
 
-               if( Motor->position >50 && Motor->position <150) //150
+               if( Motor->position >50 && Motor->position <200) //150
                {   
-                 Motor->dutyCycle = +35;
+                 //SpeedRefToDC(cvs,Motor,-7); // Motor->dutyCycle = +45;
+                Motor->dutyCycle = 65;
                  return false;
                }
-               else if( Motor->position <50)
+               else if( Motor->position <=50)
                {
                   
-                 Motor->dutyCycle = +25;
+                 //SpeedRefToDC(cvs,Motor,-5); //Motor->dutyCycle = +40;
+                 Motor->dutyCycle = 60;
                  return false;
                }
                else
                { 
+                   //SpeedRefToDC(cvs,Motor,0);
                    Motor->dutyCycle = 0;
                    return  true;
                }
   }
  bool RatGoBottom(CtrlStruct *cvs, Motor *Motor){
-     // UpdateRatPosition(cvs);
-     bool my_bool = (Motor->ID==RATLMOTOR ) ? !cvs->Sensors->uSwitchRatR : !cvs->Sensors->uSwitchRatL ;
-     if(my_bool)
-     {
-        if( Motor->position <50)
-        {
-           Motor->dutyCycle = -10;
-        }
-        else
-        {
-           Motor->dutyCycle = -20;
-        }
-         return false;
-     }
-     else
-     { 
-       Motor->position =0;
+/*bool my_bool = (Motor->ID==RATLMOTOR ) ? !cvs->Sensors->uSwitchRatL : !cvs->Sensors->uSwitchRatR ;
+if(my_bool)
+{
+   if( Motor->position <50)
+   {
+      SpeedRefToDC(cvs,Motor,-5);
+   }
+   else
+   {
+      SpeedRefToDC(cvs,Motor,-7);
+   }
+    return false;
+}
+else
+{ 
+  Motor->position =0;
+  Motor->dutyCycle = 0;
+   return true; 
+}*/
+    if( Motor->position >= 10)
+   {
+      //SpeedRefToDC(cvs,Motor,-7);
+        Motor->dutyCycle = -25;
+      return false;
+   }
+   else if(Motor->position >= 5)
+   {
+      //SpeedRefToDC(cvs,Motor,-5);
+       Motor->dutyCycle = -15;
+      return true;
+   }
+   else{
+       //SpeedRefToDC(cvs,Motor,0);
        Motor->dutyCycle = 0;
-        return true; 
-     }
+       return false;
+   }
+     
     
   }
+ 
+bool RateauReachPoint(CtrlStruct *cvs, double pos){
+    int color = cvs->robotID;
+    int erreur = 10;
+    Motor *motor = (color == GREEN) ? cvs->MotorRatL : cvs->MotorRatR;
+    if(motor->position <= pos - erreur){
+         motor->dutyCycle = 50;//SpeedRefToDC(cvs, motor, 10);
+       return false;
+    }
+    else if(motor->position >= pos + erreur){
+         motor->dutyCycle = -35;
+         //SpeedRefToDC(cvs, motor, -10);
+       return false;
+    }
+    else{
+        //SpeedRefToDC(cvs, motor, 0);
+        motor->dutyCycle = 0;
+        return true;
+    }
+}
 
  
 

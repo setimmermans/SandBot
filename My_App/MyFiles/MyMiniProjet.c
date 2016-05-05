@@ -8,53 +8,64 @@
 *******************************************************************************/
 #include "MyApp.h"
 #include "interfaceFPGA.h"
+#include "UpdateEcran_gr2.h"
 /*****************************************************************************
  * STRUCTURES
  *****************************************************************************/
 /*****************************************************************************
  * MAIN
  *****************************************************************************/
-
+//#define SD_CARD
 #define WEB
+
+
 void MyMiniProjet_Task(void)
 {
 
-    MyConsole_SendMsg("here \n");
-    MyDelayMs(2000);
+    //MyConsole_SendMsg("here \n");
+    MyDelayMs(100);
     
     /*********************************
      *DO NOT TOUCH THAT **************
      ********************************/
     InitSPIChannel();
     CtrlStruct *cvs;
+    
 	cvs = (CtrlStruct*) malloc(sizeof(CtrlStruct));
     unsigned long long currentTime = 0;
     unsigned long long previousTime = 0;
     unsigned long long previousTimeData = 0;
+   
+    cvs->colorIsSet = false;
+    while(!cvs->colorIsSet){
+       getRobotID(cvs);
+       // cvs->robotID = GREEN ; 
+      //  cvs->colorIsSet = true;
+        //MyConsole_SendMsg("robotID not set\n");
+    }
+    
+
     controller_init(cvs);
     InitWebVariables(cvs);
-    
     /*********************************
      * SD Memory *********************
      ********************************/
-    unsigned int size = 8192;
-    char timeSD[size];
-    CreateBuffer(timeSD);
-    
-    char xSD[size];
-    CreateBuffer(xSD);
+    unsigned int size = 8192;    
+    char TIME[size];
+    CreateBuffer(TIME);
         
-    char ySD[size];
-    CreateBuffer(ySD);
+    char THETA[size];
+    CreateBuffer(THETA);
+  
+     char DISTANCE[size];
+    CreateBuffer(DISTANCE);
     
-    char thetaSD[size];
-    CreateBuffer(thetaSD);
+   /* char X[size];
+    CreateBuffer(X);
     
-    char speedLSD[size];
-    CreateBuffer(speedLSD);
-    
-    char speedRSD[size];
-    CreateBuffer(speedRSD);
+        char Y[size];
+    CreateBuffer(Y);*/
+
     
     bool hasSaved = false;
     /*********************************
@@ -63,14 +74,17 @@ void MyMiniProjet_Task(void)
     while(1){
         unsigned int A = MyCyclone_Read(CYCLONE_IO_A_Data);
         unsigned int I = MyCyclone_Read(CYCLONE_IO_I_Data);
-        MyConsole_SendMsg("wtf \n");
-        bool start = (bool) extractBits(A,13,13);
+      //  MyConsole_SendMsg("wtf \n");
+        bool start = (bool) !extractBits(A,13,13);
+
+       // ChooseStratDuneOrNot(cvs);// if calib X pressed choooose to start!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if(start){
-            MyConsole_SendMsg("Starting\n");
+            cvs->Param->start =true;
+            //MyConsole_SendMsg("Starting\n");
             cvs->timeOffset = getTime();
             cvs->previousTime = 0;
             cvs->time = 0;
-            while((bool) extractBits(A,13,13)){
+            while(start){ //(bool) extractBits(A,13,13)){ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 MyConsole_Task();
                 //MyCAN_Task();
 #ifdef WEB
@@ -82,44 +96,43 @@ void MyMiniProjet_Task(void)
                     previousTime = currentTime;
                     controller_loop(cvs);    
                     
-        //#define TESTS
-
-        #ifndef TESTS
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    
+                    //getActions(cvs);
+                    //getTests(cvs);
+                    //SendMotorCommand(cvs);
+                             
+                             
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if((double)(currentTime - previousTimeData) > TIME_DATAREFRESH*(SYS_FREQ/2000)*1000){//
                         previousTimeData = currentTime;                     
 #ifdef WEB
                         /* Refresh Web Variables */
                         RefreshWebVariables(cvs);
+#endif
+                        
+#ifdef SD_CARD
                         /* Save on SD */
-#else
                         if(!hasSaved){
-                            AddElement(cvs->MotorL->speed, speedLSD);
+                            AddElement(cvs->Tower->distance, DISTANCE);
                             MyDelayMs(1);
-                            AddElement(cvs->MotorR->speed, speedRSD);
+                            AddElement(cvs->Tower->angle, THETA);
                             MyDelayMs(1);
-                            AddElement(cvs->timeStep,timeSD);
-                            MyDelayMs(1);
+                            AddElement(cvs->time, TIME);
                         }
 #endif
                     }
-#ifndef WEB
+#ifdef SD_CARD
                     /* Stopping condition*/
                     //unsigned int A = MyCyclone_Read(CYCLONE_IO_A_Data);
                     //int newTurn = extractBits(A,15,15);
-                    if(cvs->time > 20 && !hasSaved){
-                    //if((newTurn != previousTurn) && !hasSaved){
-                        //MyConsole_SendMsg("Here2 \n");
-                        /* Save data on SD */
-                        WriteSDMemory(timeSD, "time.txt", size);     
-                        WriteSDMemory(speedLSD, "speedL.txt", size);  
-                        WriteSDMemory(speedRSD, "speedR.txt", size);  
-                        //WriteSDMemory(xSD, "odox.txt", size);
-                        //WriteSDMemory(ySD, "odoy.txt",size);
-                        //WriteSDMemory(thetaSD, "theta.txt",size);
-                       
+                    if(cvs->time > 10 && !hasSaved){  
+                       // WriteSDMemory(X, "X.txt", size);  
+                        WriteSDMemory(DISTANCE, "DISTANCE.txt", size);  
+                        WriteSDMemory(THETA, "THETA.txt", size);
+                        WriteSDMemory(TIME, "TIME.txt", size);                   
                         hasSaved = true;
                     }
-        #endif
 #endif
                 }    
             }
@@ -158,6 +171,7 @@ void InitSPIChannel(){
     PinceDC = 0;
     RateauRDC = 0;
     RateauLDC = 0;
+    CommandMotorByHand = false;
 }
 
 double fmin(double A, double B){

@@ -67,7 +67,8 @@ output		         		LT24_LCD_ON
 //   TL24 Interface
 //=======================================================
 
-wire				[7:0]			ResponseFromLT24;
+logic				[7:0]			ResponseFromLT24;
+
 
 wire		          			LT24_ADC_CS_N_bus;
 wire		          			LT24_ADC_DCLK_bus;
@@ -102,7 +103,7 @@ wire [1:0]  background_mem_s2_byteenable;
 
 wire 			lt24_buffer_flag;           
 wire RST_N;
-wire [7:0] illegalLED;
+
 
 assign RST_N       = KEY[1];
 assign LT24_LCD_ON = 1'b1; //default on
@@ -126,14 +127,14 @@ DE0_LT24_SOPC DE0_LT24_SOPC_inst(
 		.from_key_export(KEY[0]),  							//   from_key.export
 		
 		// LEDS
-		.to_led_export(illegalLED),                 				//   to_led.export
+		.to_led_export(LED),                 				//   to_led.export
 		
 		// LT24 - LCD
 		.lt24_conduit_cs(LT24_CS_N_bus),      					//  lt24_conduit.cs
 		.lt24_conduit_rs(LT24_RS_bus),     						//              .rs
 		.lt24_conduit_rd(LT24_RD_N_bus),      					//              .rd
 		.lt24_conduit_wr(LT24_WR_N_bus),      					//              .wr
-		.lt24_conduit_data(LT24_D_bus),    	   				//              .data
+		.lt24_conduit_data(LT24_D_bus),    	   				//              .dat
 		.lt24_lcd_rstn_export(LT24_RESET_N_bus),				//       lt24_lcd_rstn.export
 		
 		// LT24 - TOUCH
@@ -145,7 +146,6 @@ DE0_LT24_SOPC DE0_LT24_SOPC_inst(
 		.lt24_touch_busy_export(LT24_ADC_BUSY_bus),         //           lt24_touch_busy.export
 		
 		// PLL
-		.alt_pll_c4_conduit_export(),        				//        alt_pll_c4_conduit.export
 		.alt_pll_c3_conduit_export(),        				//        alt_pll_c3_conduit.export
 		.alt_pll_areset_conduit_export(),    				//    alt_pll_areset_conduit.export
 		.alt_pll_locked_conduit_export(),    				//    alt_pll_locked_conduit.export
@@ -170,9 +170,12 @@ DE0_LT24_SOPC DE0_LT24_SOPC_inst(
 		.background_mem_s2_writedata(background_mem_s2_writedata),                 
 		.background_mem_s2_byteenable(background_mem_s2_byteenable),
 		
-		.responsetl24_external_connection_export     (ResponseFromLT24)      //     responsetl24_external_connection.export
+		//.responsetl24_external_connection_export     (illegalLED),      //     responsetl24_external_connection.export
+		.epcs_flash_controller_0_external_dclk       (EPCS_DCLK),       //     epcs_flash_controller_0_external.dclk
+		.epcs_flash_controller_0_external_sce        (EPCS_NCSO),        //                                     .sce 
+		.epcs_flash_controller_0_external_sdo        (EPCS_ASDO),        //                                     .sdo
+		.epcs_flash_controller_0_external_data0      (EPCS_DATA0)       //                                     .data0
 	);
-	
 	
 	LT24_buffer lt24_buf(
 		.clk(CLOCK_50),          							
@@ -257,6 +260,9 @@ logic [15:0] IO_M_Data_In, IO_M_Data_Out, IO_M_Enable_Out;
 logic [15:0] IO_N_Data_In, IO_N_Data_Out, IO_N_Enable_Out;
 logic [15:0] IO_O_Data_In, IO_O_Data_Out, IO_O_Enable_Out;
 logic [15:0] IO_P_Data_In, IO_P_Data_Out, IO_P_Enable_Out;
+logic [15:0] IO_Q_Data_In, IO_Q_Data_Out, IO_Q_Enable_Out;
+logic [15:0] IO_R_Data_In, IO_R_Data_Out, IO_R_Enable_Out;
+logic [15:0] IO_S_Data_In, IO_S_Data_Out, IO_S_Enable_Out;
 
 
 genvar i;
@@ -281,16 +287,35 @@ assign PIC32_RESET	= GPIO_2[10];
 //assign PIC32_RESET	= ~KEY[0];
 
 
+
 //--- Assign GPIO_0 Header -----------------------------
+//assign GPIO_0[0]     = Config[4];
+//
+////assign GPIO_0[33]    = Config[5]; 
+//assign GPIO_0[28]		= Config[5]; // !!!! C'était la pin 33 pas 28
+//
+//assign PIC32_C1RX    = GPIO_0[29];
+//assign GPIO_0[30]    = PIC32_C1TX;
+//assign GPIO_0[31]    = PIC32_SCL3A;
+//assign GPIO_0[32]    = PIC32_SDA3A;
+
+
 assign GPIO_0[0]     = Config[4];
 
 //assign GPIO_0[33]    = Config[5]; 
-assign GPIO_0[28]		= Config[5]; // !!!! C'était la pin 33 pas 28
+assign GPIO_0[25]		= Config[5]; // !!!! C'était la pin 33 pas 28
 
-assign PIC32_C1RX    = GPIO_0[29];
+assign PIC32_C1RX    = GPIO_0[24];
 assign GPIO_0[30]    = PIC32_C1TX;
 assign GPIO_0[31]    = PIC32_SCL3A;
 assign GPIO_0[32]    = PIC32_SDA3A;
+
+
+
+
+
+
+
 
 //--- Assign Status, INT ---------------------------------
 
@@ -341,9 +366,9 @@ assign uSwitchRight 			= GPIO_0[20];
 assign uSwitchPince 			= GPIO_0[21];
 assign uSwitchRateauLeft 	= GPIO_0[22];
 assign uSwitchRateauRight 	= GPIO_0[23];
-assign UartTx 					= GPIO_0[24];
-assign UartRx 					= GPIO_0[25];
-assign UartDir 				= GPIO_0[26];
+//assign UartTx 					= GPIO_0[24];
+//assign UartRx 					= GPIO_0[25];
+//assign UartDir 				= GPIO_0[26];
 assign Start = GPIO_0[33];
 
 assign ID						= SW[0];
@@ -366,16 +391,18 @@ assign UartDir = GPIO_0[22];*/
 logic [31:0] TestCodeurs;
 counter #(32) CompteurTest(LaserCodeurA,PIC32_RESET,TestCodeurs);
 
-assign LED = {~LaserSign, LaserSync, LaserCodeurA, LaserCodeurB, PropLeftCodeurA, PropLeftCodeurB, PropRightCodeurA, PropRightCodeurB}; //
-//assign LED = IO_N_Data_Out[7:0];
+//assign LED = {~LaserSign, LaserSync, LaserCodeurA, LaserCodeurB, PropLeftCodeurA, PropLeftCodeurB, PropRightCodeurA, PropRightCodeurB}; //
+//assign LED = dynDataRead[7:0];
 //assign LED = {Start, Start, Start, Start, Start, Start, Start, Start};
+//assign LED = ResponseFromLT24;
+assign ResponseFromLT24 = LED;
 //--- Gestion Glitch et Compteur Codeur -----------------
 
 logic [15:0] CompteurLaser;
 reg   [15:0] DebutReception, FinReception;
 logic NewTowerTurn;
 
-counterPulseReset #(16) CompteurTourelle(LaserCodeurA, LaserSync, CompteurLaser); //modifed !
+counter #(16) CompteurTourelle(LaserCodeurA, LaserSync, CompteurLaser);
 
 GlitchHandler GlitchSignLaser(CLOCK_50, PIC32_RESET,  LaserSign, LaserSync, CompteurLaser, DebutReception, FinReception, LaserCodeurA);
 
@@ -391,7 +418,6 @@ logic [15:0] CompteurCodeurLeft, CompteurCodeurRight, CompteurCodeurLeftB, Compt
 logic [15:0] CompteurOdoLeftA, CompteurOdoRightA, CompteurOdoLeftB, CompteurOdoRightB;
 logic [15:0] CompteurPinceA, CompteurPinceB;
 logic [15:0] CompteurRateauLeftA, CompteurRateauRightA, CompteurRateauLeftB, CompteurRateauRightB;
-logic [15:0] CompteurLaserA;
 
 logic [31:0] CompteurVitesse;
 
@@ -403,7 +429,6 @@ reg 	[15:0] SpeedPince;
 reg			 positiveSpeedPince;
 reg 	[15:0] SpeedRateauL,SpeedRateauR;
 reg			 positiveSpeedRateauL, positiveSpeedRateauR;
-reg 	[15:0] SpeedTower;
 
 logic ResetCompteurVitesse; 
 
@@ -426,8 +451,6 @@ counter #(16) ComptCodRateauLeftA (RateauLeftCodeurA,  ResetCompteurVitesse, Com
 counter #(16) ComptCodRateauRightA(RateauRightCodeurA, ResetCompteurVitesse, CompteurRateauRightA);
 counter #(16) ComptCodRateauLeftB (RateauLeftCodeurB,  ResetCompteurVitesse, CompteurRateauLeftB);
 counter #(16) ComptCodRateauRightB(RateauRightCodeurB, ResetCompteurVitesse, CompteurRateauRightB);
-
-counter #(16) ComptCodTowerA(LaserCodeurA, ResetCompteurVitesse, CompteurLaserA);
 
 // SpeedDirection
 always_ff@(posedge PropLeftCodeurA)
@@ -491,7 +514,6 @@ begin
 			SpeedRateauL <= (CompteurRateauLeftA + CompteurRateauLeftB)/2;
 			SpeedRateauR <= (CompteurRateauRightA + CompteurRateauRightB)/2;
 			SpeedPince <= (CompteurPinceA + CompteurPinceB)/2;
-			SpeedTower <= CompteurLaserA;
 		end
 	else if (CompteurVitesse == 32'd500001) 
 			ResetCompteurVitesse <= 1'b1; 
@@ -499,9 +521,9 @@ begin
 			ResetCompteurVitesse <= 1'b0;
 end
 
-assign GPIO_0[26] = UARTTX;
-assign UARTRX = GPIO_0[24];
-assign GPIO_0[22] = UARTDIR;
+assign GPIO_0[29] = UARTTX;//29
+assign UARTRX = GPIO_0[28];//28
+assign GPIO_0[27] = UARTDIR;//27
 
 //--- Envoi data ----------------------------------------
 
@@ -521,26 +543,24 @@ begin
 	IO_F_Data_In <= SpeedPince[15:0];
 	IO_G_Data_In <= SpeedRateauL[15:0];
 	IO_H_Data_In <= SpeedRateauR[15:0];
-	IO_I_Data_In <= SpeedTower[15:0];
+	IO_I_Data_In <= TestCodeurs[31:16];
 	IO_J_Data_In <= TestCodeurs[15:0];
 	IO_K_Data_In <= DebutReception[15:0];
 	IO_L_Data_In <= FinReception[15:0];
-	IO_M_Data_In <= 16'b0; //CompteurMax[15:0];
-	IO_N_Data_In <= {8'b0,ResponseFromLT24};
+	IO_M_Data_In <= {8'b0,ResponseFromLT24}; //CompteurMax[15:0];
+	//IO_N_Data_In <= {8'b0,ResponseFromLT24};
 	
-	dynSelector 		<= IO_N_Data_Out[2:0];
-	dynEnRead			<= IO_N_Data_Out[3];
-	dynEnWrite			<= IO_N_Data_Out[4];
+	dynSelector 		<= IO_S_Data_Out[2:0];
+	dynEnRead			<= IO_S_Data_Out[3];
+	dynEnWrite			<= IO_S_Data_Out[4];
 	
-	dynDataWrite[7:0]		<= IO_N_Data_Out[15:8];
+	dynDataWrite[7:0]		<= IO_S_Data_Out[15:8];
 	dynDataWrite[15:8]	<= IO_O_Data_Out[7:0];
 	dynDataWrite[23:16]	<= IO_O_Data_Out[15:8];
 	dynDataWrite[31:24]	<= IO_P_Data_Out[7:0];
 	
-	//IO_E_Data_In <= dynDataRead[7:0];
-	//IO_F_Data_In <= dynDataRead[15:8];
-	//IO_G_Data_In <= dynDataRead[23:16];
-	//IO_H_Data_In <= dynDataRead[31:24];
+	IO_Q_Data_In <= dynDataRead[15:0];
+	IO_R_Data_In <= dynDataRead[31:16];
 	
 	/*IO_F_Data_In <=(NoSign)? 8'b00000000:FinReception[7:0]; 
 	IO_G_Data_In <= VitesseRight[15:8]; 
@@ -571,9 +591,9 @@ MySPI MySPI_instance (
 	.Config(Config),
 	.Status(Status),
 	.Led70(Led70),
-	.IO_A_Data_In(IO_A_Data_In), 			.IO_B_Data_In(IO_B_Data_In), 			.IO_C_Data_In(IO_C_Data_In), 			.IO_D_Data_In(IO_D_Data_In),			.IO_E_Data_In(IO_E_Data_In),			.IO_F_Data_In(IO_F_Data_In),			.IO_G_Data_In(IO_G_Data_In),			.IO_H_Data_In(IO_H_Data_In),			.IO_I_Data_In(IO_I_Data_In),			.IO_J_Data_In(IO_J_Data_In),			.IO_K_Data_In(IO_K_Data_In),			.IO_L_Data_In(IO_L_Data_In),			.IO_M_Data_In(IO_M_Data_In), 				.IO_N_Data_In(IO_N_Data_In),				.IO_O_Data_In(IO_O_Data_In),				.IO_P_Data_In(IO_P_Data_In),
-	.IO_A_Data_Out(IO_A_Data_Out), 		.IO_B_Data_Out(IO_B_Data_Out), 		.IO_C_Data_Out(IO_C_Data_Out), 		.IO_D_Data_Out(IO_D_Data_Out),		.IO_E_Data_Out(IO_E_Data_Out),		.IO_F_Data_Out(IO_F_Data_Out),		.IO_G_Data_Out(IO_G_Data_Out),		.IO_H_Data_Out(IO_H_Data_Out),		.IO_I_Data_Out(IO_I_Data_Out),		.IO_J_Data_Out(IO_J_Data_Out),		.IO_K_Data_Out(IO_K_Data_Out),		.IO_L_Data_Out(IO_L_Data_Out),		.IO_M_Data_Out(IO_M_Data_Out),			.IO_N_Data_Out(IO_N_Data_Out),			.IO_O_Data_Out(IO_O_Data_Out),			.IO_P_Data_Out(IO_P_Data_Out),
-	.IO_A_Enable_Out(IO_A_Enable_Out), 	.IO_B_Enable_Out(IO_B_Enable_Out), 	.IO_C_Enable_Out(IO_C_Enable_Out), 	.IO_D_Enable_Out(IO_D_Enable_Out), 	.IO_E_Enable_Out(IO_E_Enable_Out), 	.IO_F_Enable_Out(IO_F_Enable_Out), 	.IO_G_Enable_Out(IO_G_Enable_Out), 	.IO_H_Enable_Out(IO_H_Enable_Out), 	.IO_I_Enable_Out(IO_I_Enable_Out), 	.IO_J_Enable_Out(IO_J_Enable_Out), 	.IO_K_Enable_Out(IO_K_Enable_Out), 	.IO_L_Enable_Out(IO_L_Enable_Out), 	.IO_M_Enable_Out(IO_M_Enable_Out),		.IO_N_Enable_Out(IO_N_Enable_Out),		.IO_O_Enable_Out(IO_N_Enable_Out),		.IO_P_Enable_Out(IO_P_Enable_Out));
+	.IO_A_Data_In(IO_A_Data_In), 			.IO_B_Data_In(IO_B_Data_In), 			.IO_C_Data_In(IO_C_Data_In), 			.IO_D_Data_In(IO_D_Data_In),			.IO_E_Data_In(IO_E_Data_In),			.IO_F_Data_In(IO_F_Data_In),			.IO_G_Data_In(IO_G_Data_In),			.IO_H_Data_In(IO_H_Data_In),			.IO_I_Data_In(IO_I_Data_In),			.IO_J_Data_In(IO_J_Data_In),			.IO_K_Data_In(IO_K_Data_In),			.IO_L_Data_In(IO_L_Data_In),			.IO_M_Data_In(IO_M_Data_In), 				.IO_N_Data_In(IO_N_Data_In),				.IO_O_Data_In(IO_O_Data_In),				.IO_P_Data_In(IO_P_Data_In),				.IO_Q_Data_In(IO_Q_Data_In),				.IO_R_Data_In(IO_R_Data_In),				.IO_S_Data_In(IO_S_Data_In),
+	.IO_A_Data_Out(IO_A_Data_Out), 		.IO_B_Data_Out(IO_B_Data_Out), 		.IO_C_Data_Out(IO_C_Data_Out), 		.IO_D_Data_Out(IO_D_Data_Out),		.IO_E_Data_Out(IO_E_Data_Out),		.IO_F_Data_Out(IO_F_Data_Out),		.IO_G_Data_Out(IO_G_Data_Out),		.IO_H_Data_Out(IO_H_Data_Out),		.IO_I_Data_Out(IO_I_Data_Out),		.IO_J_Data_Out(IO_J_Data_Out),		.IO_K_Data_Out(IO_K_Data_Out),		.IO_L_Data_Out(IO_L_Data_Out),		.IO_M_Data_Out(IO_M_Data_Out),			.IO_N_Data_Out(IO_N_Data_Out),			.IO_O_Data_Out(IO_O_Data_Out),			.IO_P_Data_Out(IO_P_Data_Out),			.IO_Q_Data_Out(IO_Q_Data_Out),			.IO_R_Data_Out(IO_R_Data_Out),			.IO_S_Data_Out(IO_S_Data_Out),
+	.IO_A_Enable_Out(IO_A_Enable_Out), 	.IO_B_Enable_Out(IO_B_Enable_Out), 	.IO_C_Enable_Out(IO_C_Enable_Out), 	.IO_D_Enable_Out(IO_D_Enable_Out), 	.IO_E_Enable_Out(IO_E_Enable_Out), 	.IO_F_Enable_Out(IO_F_Enable_Out), 	.IO_G_Enable_Out(IO_G_Enable_Out), 	.IO_H_Enable_Out(IO_H_Enable_Out), 	.IO_I_Enable_Out(IO_I_Enable_Out), 	.IO_J_Enable_Out(IO_J_Enable_Out), 	.IO_K_Enable_Out(IO_K_Enable_Out), 	.IO_L_Enable_Out(IO_L_Enable_Out), 	.IO_M_Enable_Out(IO_M_Enable_Out),		.IO_N_Enable_Out(IO_N_Enable_Out),		.IO_O_Enable_Out(IO_O_Enable_Out),		.IO_P_Enable_Out(IO_P_Enable_Out),		.IO_Q_Enable_Out(IO_Q_Enable_Out),		.IO_R_Enable_Out(IO_R_Enable_Out),		.IO_S_Enable_Out(IO_S_Enable_Out));
 
 
 	
@@ -609,31 +629,6 @@ always_ff @ (posedge clk, posedge reset)
 	begin
 		if(reset | (count === 'x)) count	<=	'b0;
 		else count <= count + 'b1;
-	end	    
-	
-endmodule  
-
-/*
-=======================================================
-=============== Compteur Avec Pulse Reset =============
-=======================================================
-*/
-
-module counterPulseReset #(	parameter bits = 32	)
-					 ( input 	 	logic clk,
-					   input			logic	reset,
-						output reg	[bits-1:0]	count	);
-logic hasReset;
-always_ff @ (posedge clk, posedge reset)
-	begin
-		if(reset | (count === 'x)) begin
-			if(~hasReset) count	<=	'b0;
-			hasReset = 1'b1;
-			end
-		else begin
-			count <= count + 'b1;
-			hasReset = 1'b0;
-		end
 	end	    
 	
 endmodule  

@@ -2,6 +2,7 @@
 #define _allParamInit_GR2_H_
 
 #include "CtrlStruct_gr2.h"
+#include "dynamixel_gr2.h"
 
 #ifndef REALBOT
 #include "namespace_ctrl.h"
@@ -40,8 +41,8 @@ NAMESPACE_INIT(ctrlGr2);
 	#define MaxAcceleration_DEFAULT	100
 #endif //REALBOT
 
-#define Kp_DEFAULT 0.3
-#define Ki_DEFAULT 5
+#define Kp_DEFAULT 0.3//0.62//0.3 //0.6
+#define Ki_DEFAULT 5//14.44//5 //15
 
 /************************************
  * MOTORS ***************************
@@ -165,7 +166,7 @@ NAMESPACE_INIT(ctrlGr2);
 /************************************
  * PARAMS ***************************
  ***********************************/
-#define radiusBot_INIT			0.16//0.2 //0.015 ?
+#define radiusBot_INIT			0.17//0.2 //0.015 ?
 #define width_INIT				width_DEFAULT //0.2625
 #define lengthTower_INIT		0.0833
 #define wheelLRadius_INIT		wheelLRadius_DEFAULT
@@ -190,13 +191,13 @@ NAMESPACE_INIT(ctrlGr2);
  * POTO *****************************
  ***********************************/
 #define katt_INIT				10//1.0
-#define krep_INIT				0.001//0.001
+#define krep_INIT				0.001//0.0015//0.001
 #define kFV_INIT				30
 #define FXRob_INIT				0
 #define FyRob_INIT				0
-#define kw_INIT					100
-#define minDistance_INIT		0.5 
-#define thresholdAligned_INIT   0.5//10
+#define kw_INIT					100//200//100
+#define minDistance_INIT		0.3//0.5
+#define thresholdAligned_INIT   2//0.75//10
 
 /************************************
  * ODOMETRY  ************************
@@ -211,7 +212,7 @@ NAMESPACE_INIT(ctrlGr2);
 #define NumberOfQuarterOfCircle_INIT 4
 #define NumberOfRectangles_INIT 10
 #define NumberOfCircles_INIT	2 //2Bots + 1 
-#define radiusEnnemyBot			0.35
+#define radiusEnnemyBot			0.43
  /************************************
  * GOALS ************************
  ***********************************/
@@ -243,6 +244,12 @@ NAMESPACE_INIT(ctrlGr2);
  * Dyna ***************************
  ***********************************/
 // Id rateau gauche = 5, Id rateau droit = 6, Id parasol = 3
+
+#define DynaRatL    0x05
+#define DynaRatR    0x06
+#define DynaPara    0x03
+#define DynaAll     0xFE
+
 /******************
 **** PROTOTYPES ***
 ******************/
@@ -252,10 +259,11 @@ void InitSensors(CtrlStruct *cvs);
 void InitTower(CtrlStruct *cvs);
 void InitPotential(CtrlStruct *cvs);
 void InitOdometry(CtrlStruct *cvs);
-void InitGoals(CtrlStruct *cvs);
 void InitObstacles(CtrlStruct *cvs);
-void InitDyna(CtrlStruct *cvs);
+//void InitDyna(CtrlStruct *cvs);
 void InitTowerFilters(CtrlStruct *cvs);
+void InitTimer(CtrlStruct *cvs);
+
 #ifndef REALBOT
 NAMESPACE_CLOSE();
 #endif // !REALBOT
